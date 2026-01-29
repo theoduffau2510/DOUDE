@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables CSS personnalisées pour Doude */
+:root {
+  --cream: #faf8f5;
+  --cream-dark: #f0ebe3;
+  --sand: #e8dfd3;
+  --caramel: #c4956a;
+  --caramel-dark: #a67c52;
+  --espresso: #5c4a3d;
+  --espresso-light: #7a6455;
+  --sage: #7d9a78;
+  --sage-light: #a8c4a2;
+  --coral: #d4847c;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--cream);
+  color: var(--espresso);
+  margin: 0;
+}
+
+/* Classe utilitaire pour la police Fraunces */
+.font-fraunces {
+  font-family: 'Fraunces', serif;
+}
+/* Animation fade in + slide up */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation scale in pour modales - PLUS LENTE ET SUBTILE */
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation fade simple */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+/* Classes d'animation */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Délais pour effet cascade */
+.delay-100 { 
+  animation-delay: 0.1s; 
+}
+
+.delay-200 { 
+  animation-delay: 0.2s; 
+}
+
+.delay-300 { 
+  animation-delay: 0.3s; 
+}
+
+.delay-400 { 
+  animation-delay: 0.4s; 
+}
+
+/* Hover effects modernes - PLUS SUBTILS */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+/* Backdrop moderne pour modales */
+.backdrop-modern {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.2s ease;
+}
+
+/* Effet stagger pour listes */
+.stagger-item {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* Transition smooth pour tous les éléments interactifs */
+button, a, input, select, textarea {
+  transition: all 0.2s ease;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation scale in pour modales */
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation fade simple */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+/* SCROLL REVEAL - Élément caché par défaut */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* SCROLL REVEAL - Élément visible quand en vue */
+.scroll-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Classes d'animation */
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Délais pour effet cascade */
+.delay-100 { 
+  transition-delay: 0.1s;
+}
+
+.delay-200 { 
+  transition-delay: 0.2s;
+}
+
+.delay-300 { 
+  transition-delay: 0.3s;
+}
+
+.delay-400 { 
+  transition-delay: 0.4s;
+}
+
+/* Hover effects modernes */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+/* Backdrop moderne pour modales */
+.backdrop-modern {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.2s ease;
+}
+
+/* Effet stagger pour listes */
+.stagger-item {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* Transition smooth pour tous les éléments interactifs */
+button, a, input, select, textarea {
+  transition: all 0.2s ease;
+}
