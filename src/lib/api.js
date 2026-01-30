@@ -64,8 +64,8 @@ export const stripeAPI = {
   /**
    * Vérifier une session après paiement
    */
-  verifySession: async (sessionId) => {
-    return apiRequest(`/api/stripe/verify-session/${sessionId}`);
+   verifySession: async (sessionId) => {
+  return apiRequest(`/verify-session/${sessionId}`); // ← RETIREZ /api/stripe
   },
   
   /**
