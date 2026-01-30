@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
+    base: '/',
     
     // Configuration du serveur de développement
     server: {
