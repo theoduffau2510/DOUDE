@@ -177,11 +177,11 @@ useEffect(() => {
 }, [])
 
   useEffect(() => {
-    if (user) {
-      fetchStudents()
-    }
+  if (user) {
+    fetchStudents()
+  }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, supabase])
+}, [user])
 
   const fetchStudents = async () => {
     if (!supabase) return
