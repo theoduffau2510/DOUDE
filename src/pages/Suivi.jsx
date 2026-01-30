@@ -177,15 +177,27 @@ useEffect(() => {
 }, [])
 
  useEffect(() => {
-  if (user && supabase) {
-    fetchStudents()
+  let isMounted = true
+  
+  const loadStudents = async () => {
+    if (user && isMounted) {
+      await fetchStudents()
+    }
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
+  loadStudents()
+  
+  return () => {
+    isMounted = false
+  }
 }, [user])
 
   const fetchStudents = async () => {
-    if (!supabase) return
-    setLoading(true)
+  if (!supabase || !user) return
+  
+  setLoading(true)
+  
+  try {
     const { data, error } = await supabase
       .from('students')
       .select('*')
@@ -197,8 +209,12 @@ useEffect(() => {
     } else {
       setStudents(data || [])
     }
+  } catch (err) {
+    console.error('Erreur inattendue:', err)
+  } finally {
     setLoading(false)
   }
+}
 
   const openAddModal = () => {
     setEditingStudent(null)
