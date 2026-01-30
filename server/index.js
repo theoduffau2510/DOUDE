@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import stripeRoutes from './webhooks/routes/stripe.js';
+import stripeRoutes from './routes/stripe.js';
 import stripeWebhook from './webhooks/stripe.js';
 
 const app = express();
