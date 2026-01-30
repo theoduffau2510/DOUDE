@@ -177,20 +177,11 @@ useEffect(() => {
 }, [])
 
  useEffect(() => {
-  let isMounted = true
-  
-  const loadStudents = async () => {
-    if (user && isMounted) {
-      await fetchStudents()
-    }
+  if (user) {
+    fetchStudents()
   }
-  
-  loadStudents()
-  
-  return () => {
-    isMounted = false
-  }
-}, [user])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [user, supabase])
 
   const fetchStudents = async () => {
   if (!supabase || !user) return
