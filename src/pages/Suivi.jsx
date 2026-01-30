@@ -156,7 +156,7 @@ export default function Suivi() {
   const [bilanTrimestre, setBilanTrimestre] = useState(1);
 
   const [formData, setFormData] = useState({ 
-    name: '', niveau: '3ème', matiere: '', tel: '', objectif: 14, parent_email: '', appreciation: '' 
+    name: '', niveau: '3ème', matiere: '', tel: '', objectif: 14, parent_email: '', appreciation: '', show_progress_chart: false 
   });
   
  const [noteFormData, setNoteFormData] = useState({ 
@@ -216,7 +216,8 @@ useEffect(() => {
       tel: student.tel || '',
       objectif: student.objectif || 14,
       appreciation: student.appreciation || '',
-      parent_email: student.parent_email || ''
+      parent_email: student.parent_email || '',
+      show_progress_chart: student.show_progress_chart || false
     })
     setShowModal(true)
   }
@@ -240,7 +241,8 @@ useEffect(() => {
         tel: formData.tel,
         objectif: parseInt(formData.objectif) || 14,
         appreciation: formData.appreciation,
-        parent_email: formData.parent_email || null
+        parent_email: formData.parent_email || null,
+        show_progress_chart: formData.show_progress_chart
       })
       .eq('id', editingStudent.id)
 
@@ -277,7 +279,8 @@ useEffect(() => {
         notes: [],
         appreciation: '',
         parent_email: formData.parent_email || null,
-        link_code: linkCode
+        link_code: linkCode,
+        show_progress_chart: formData.show_progress_chart
       })
       .select()
 
@@ -1260,6 +1263,35 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
                     />
                   </div>
 
+                  {(isPro || isPremium) && (
+  <div className="bg-gradient-to-br from-[var(--sage)]/10 to-[var(--caramel)]/10 rounded-2xl p-4">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <LineChart className="text-[var(--sage)]" size={20} />
+        <div>
+          <div className="font-semibold text-[var(--espresso)] text-sm">
+            Courbe de progression
+          </div>
+          <div className="text-xs text-[var(--espresso-light)]">
+            Afficher le graphique dans la fiche élève
+          </div>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={() => setFormData({...formData, show_progress_chart: !formData.show_progress_chart})}
+        className={`relative w-14 h-7 rounded-full transition-colors ${
+          formData.show_progress_chart ? 'bg-[var(--sage)]' : 'bg-gray-300'
+        }`}
+      >
+        <div className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
+          formData.show_progress_chart ? 'translate-x-7' : 'translate-x-0'
+        }`} />
+      </button>
+    </div>
+  </div>
+)}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-[var(--espresso)] mb-2">Niveau</label>
@@ -1382,6 +1414,61 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
                 </div>
               </div>
 
+                {hasFeature('progressChart') && (
+          <div className="bg-gradient-to-br from-[var(--sage)]/10 to-[var(--caramel)]/10 rounded-2xl p-5 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <LineChart className="text-[var(--sage)]" size={24} />
+                <div>
+                  <h3 className="font-semibold text-[var(--espresso)]">Courbe de progression</h3>
+                  <p className="text-sm text-[var(--espresso-light)]">
+                    {selectedStudent.show_progress_chart 
+                      ? 'Activée - Le graphique est visible ci-dessous' 
+                      : 'Désactivée - Activez pour voir le graphique'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  const newValue = !selectedStudent.show_progress_chart
+                  const { error } = await supabase
+                    .from('students')
+                    .update({ show_progress_chart: newValue })
+                    .eq('id', selectedStudent.id)
+                  
+                  if (!error) {
+                    const updatedStudent = { ...selectedStudent, show_progress_chart: newValue }
+                    setSelectedStudent(updatedStudent)
+                    setStudents(students.map(s => s.id === selectedStudent.id ? updatedStudent : s))
+                  }
+                }}
+                className={`relative w-14 h-7 rounded-full transition-colors ${
+                  selectedStudent.show_progress_chart ? 'bg-[var(--sage)]' : 'bg-gray-300'
+                }`}
+              >
+                <div className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform ${
+                  selectedStudent.show_progress_chart ? 'translate-x-7' : 'translate-x-0'
+                }`} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Courbe de progression (affichée seulement si activée) */}
+        {hasFeature('progressChart') && selectedStudent.show_progress_chart && (
+          <div className="mb-8">
+            <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold mb-4 flex items-center gap-2">
+              <LineChart className="text-[var(--sage)]" size={24} />
+              Graphique détaillé
+            </h3>
+            <ProgressChart
+              notes={selectedStudent.notes}
+              objectif={selectedStudent.objectif || 14}
+              hasAccess={true}
+            />
+          </div>
+        )}
+
               <div className="p-8">
                 {/* Stats en grille */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -1460,7 +1547,7 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
                   <ProgressChart
                     notes={selectedStudent.notes}
                     objectif={selectedStudent.objectif || 14}
-                    hasAccess={hasFeature('progressChart')}
+                    hasAccess={hasFeature('progressChart') && selectedStudent.show_progress_chart}
                   />
                 </div>
 
