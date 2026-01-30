@@ -176,8 +176,8 @@ useEffect(() => {
   return () => subscription.unsubscribe()
 }, [])
 
-  useEffect(() => {
-  if (user) {
+ useEffect(() => {
+  if (user && supabase) {
     fetchStudents()
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
