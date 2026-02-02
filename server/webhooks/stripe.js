@@ -25,13 +25,22 @@ function getSupabaseAdmin() {
 
 // Mapping des price IDs vers les tiers
 const PRICE_TO_TIER = {
-  gratuit_monthly: 'price_1SwNdsFSyMXEe0X7Wd46Qrok',
-  gratuit_yearly: 'price_1SwNeGFSyMXEe0X72bi92I0F',
-  pro_monthly: 'price_1SwNecFSyMXEe0X7DgtMYDSs',
-  pro_yearly: 'price_1SwNf9FSyMXEe0X7IEmQgSBp',
-  premium_monthly: 'price_1SwNfQFSyMXEe0X7BvRNgApe',
-  premium_yearly: 'price_1SwNfdFSyMXEe0X74z6DNY0b'
-}
+  // ✅ PRODUCTION (LIVE)
+  'price_1SwNdsFSyMXEe0X7Wd46Qrok': 'gratuit',  // gratuit_monthly
+  'price_1SwNeGFSyMXEe0X72bi92I0F': 'gratuit',  // gratuit_yearly
+  'price_1SwNecFSyMXEe0X7DgtMYDSs': 'pro',      // pro_monthly
+  'price_1SwNf9FSyMXEe0X7IEmQgSBp': 'pro',      // pro_yearly
+  'price_1SwNfQFSyMXEe0X7BvRNgApe': 'premium',  // premium_monthly
+  'price_1SwNfdFSyMXEe0X74z6DNY0b': 'premium',  // premium_yearly
+  
+  // TEST (pour garder la compatibilité)
+  'price_1SuACOFEu2lrL216y4C6PbuP': 'gratuit',
+  'price_1SuADVFEu2lrL216SQm5agHc': 'gratuit',
+  'price_1SuACnFEu2lrL216xouwXPm0': 'pro',
+  'price_1SuADhFEu2lrL21638mz6Oij': 'pro',
+  'price_1SuAD4FEu2lrL2160uwZdxG4': 'premium',
+  'price_1SuAEWFEu2lrL216eLG8DOiB': 'premium'
+};
 
 // ✅ FORMAT EXPRESS (pas Next.js)
 export default async function stripeWebhook(req, res) {
