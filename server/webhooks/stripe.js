@@ -42,9 +42,12 @@ export default async function stripeWebhook(req, res) {
     const sig = req.headers['stripe-signature'];
     
     console.log('📦 Buffer reçu:', req.body?.length || 0, 'bytes');
-    console.log('🔑 Signature:', sig ? 'présente' : 'MANQUANTE');
-    
-    let event;
+console.log('🔑 Signature:', sig ? 'présente' : 'MANQUANTE');
+console.log('🔐 Secret existe?', !!process.env.STRIPE_WEBHOOK_SECRET);
+console.log('🔐 Secret commence par whsec_?', process.env.STRIPE_WEBHOOK_SECRET?.startsWith('whsec_'));
+console.log('📝 Body type:', typeof req.body, 'Buffer?', Buffer.isBuffer(req.body));
+
+let event;
 
     try {
       event = stripe.webhooks.constructEvent(
