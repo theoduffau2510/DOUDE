@@ -16,6 +16,7 @@ import Emploi from './Emploi.jsx'
 import MentionsLegales from './MentionsLegales.jsx'
 import Confidentialite from './Confidentialite.jsx'
 import CGV from './CGV.jsx'
+import CGU from './CGU'
 import FAQ from './FAQ.jsx'
 import Aide from './Aide.jsx'
 
@@ -160,6 +161,7 @@ function AppLayout() {
         <Route path="/mentions-legales" element={<MentionsLegales />} />
         <Route path="/confidentialite" element={<Confidentialite />} />
         <Route path="/cgv" element={<CGV />} />
+        <Route path="/cgu" element={<CGU />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/aide" element={<Aide />} />
       </Routes>

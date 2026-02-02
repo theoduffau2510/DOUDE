@@ -98,6 +98,9 @@ export default function Footer({ showTransition = false }) {
             <Link to="/cgv" className="block text-[var(--cream)] opacity-80 no-underline py-2 text-sm hover:opacity-100 hover:translate-x-1 hover:text-[var(--caramel)] transition-all duration-200">
               CGV
             </Link>
+            <Link to="/cgu" className="block text-[var(--cream)] opacity-80 no-underline py-2 text-sm hover:opacity-100 hover:translate-x-1 hover:text-[var(--caramel)] transition-all duration-200">
+            CGU
+            </Link>
           </div>
         </div>
 
