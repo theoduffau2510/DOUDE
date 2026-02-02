@@ -37,8 +37,8 @@ export default function Contact() {
             <div className="text-3xl mb-3">✉️</div>
             <h3 className="font-fraunces text-lg text-[var(--espresso)] mb-2">Email</h3>
             <p className="text-[var(--espresso-light)] text-sm mb-3">Pour toute question générale ou demande de partenariat.</p>
-            <a href="mailto:contact@doude.fr" className="text-[var(--caramel)] font-semibold text-sm hover:text-[var(--caramel-dark)] transition-colors">
-              contact@doude.fr
+            <a href="mailto:contact@doude.app" className="text-[var(--caramel)] font-semibold text-sm hover:text-[var(--caramel-dark)] transition-colors">
+              contact@doude.app
             </a>
           </div>
 

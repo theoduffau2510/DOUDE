@@ -287,8 +287,8 @@ export default function CGU() {
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <p className="text-[var(--espresso-light)] leading-relaxed">
                 Pour toute question relative aux présentes CGU, contactez-nous à :{' '}
-                <a href="mailto:contactdoude@gmail.com" className="text-[var(--caramel)] hover:underline">
-                  contactdoude@gmail.com
+                <a href="mailto:contact@doude.app" className="text-[var(--caramel)] hover:underline">
+                  contact@doude.app
                 </a>
               </p>
             </div>

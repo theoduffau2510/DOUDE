@@ -121,8 +121,8 @@ export default function CGV() {
               </p>
               <p className="text-[var(--espresso-light)] leading-relaxed mt-4">
                 Pour exercer ce droit, envoyez un email à{' '}
-                <a href="mailto:contactdoude@gmail.com" className="text-[var(--caramel)] hover:underline">
-                  contactdoude@gmail.com
+                <a href="mailto:contact@doude.app" className="text-[var(--caramel)] hover:underline">
+                  contact@doude.app
                 </a>{' '}
                 en indiquant clairement votre volonté de vous rétracter. Le remboursement sera effectué
                 dans un délai de 14 jours suivant la réception de votre demande.
@@ -273,8 +273,8 @@ export default function CGV() {
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <p className="text-[var(--espresso-light)] leading-relaxed">
                 Pour toute question relative aux présentes CGV :{' '}
-                <a href="mailto:contactdoude@gmail.com" className="text-[var(--caramel)] hover:underline">
-                  contactdoude@gmail.com
+                <a href="mailto:contact@doude.app" className="text-[var(--caramel)] hover:underline">
+                  contact@doude.app
                 </a>
               </p>
               <p className="text-[var(--espresso-light)] mt-2">

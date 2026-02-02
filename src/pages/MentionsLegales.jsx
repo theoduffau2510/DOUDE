@@ -13,7 +13,7 @@ export default function MentionsLegales() {
               <p><strong>Statut :</strong> Auto-entrepreneur</p>
               <p><strong>SIRET :</strong> 99221410600013</p>
               <p><strong>Adresse :</strong> 323 avenue Paul Emile Victor, 77000 Melun, France</p>
-              <p><strong>Email :</strong> contactdoude@gmail.com</p>
+              <p><strong>Email :</strong> contact@doude.app</p>
               <p><strong>Directeur de la publication :</strong> DUFFAU</p>
             </div>
           </section>
@@ -106,8 +106,8 @@ export default function MentionsLegales() {
               <p className="text-[var(--espresso-light)] leading-relaxed">
                 Pour toute question relative aux présentes mentions légales, vous pouvez nous contacter à
                 l'adresse suivante :{' '}
-                <a href="mailto:contactdoude@gmail.com" className="text-[var(--caramel)] hover:underline">
-                  contactdoude@gmail.com
+                <a href="mailto:contact@doude.app" className="text-[var(--caramel)] hover:underline">
+                  contact@doude.app
                 </a>
               </p>
             </div>

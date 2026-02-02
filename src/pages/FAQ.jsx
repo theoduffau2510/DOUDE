@@ -42,7 +42,7 @@ export default function FAQ() {
         },
         {
           question: "Comment supprimer mon compte ?",
-          answer: "Pour supprimer votre compte, envoyez un email à contactdoude@gmail.com. Nous procéderons à la suppression dans un délai de 48h. Attention : toutes vos données seront définitivement effacées."
+          answer: "Pour supprimer votre compte, envoyez un email à contact@doude.app. Nous procéderons à la suppression dans un délai de 48h. Attention : toutes vos données seront définitivement effacées."
         }
       ]
     },
@@ -67,7 +67,7 @@ export default function FAQ() {
         },
         {
           question: "Comment résilier mon abonnement ?",
-          answer: "Vous pouvez résilier à tout moment depuis votre espace personnel ou en envoyant un email à contactdoude@gmail.com. La résiliation prend effet à la fin de la période en cours. Vous conservez l'accès jusqu'à cette date."
+          answer: "Vous pouvez résilier à tout moment depuis votre espace personnel ou en envoyant un email à contact@doude.app. La résiliation prend effet à la fin de la période en cours. Vous conservez l'accès jusqu'à cette date."
         }
       ]
     },
@@ -139,7 +139,7 @@ export default function FAQ() {
         },
         {
           question: "Puis-je récupérer mes données ?",
-          answer: "Oui, conformément au RGPD, vous avez le droit à la portabilité de vos données. Contactez-nous à contactdoude@gmail.com pour obtenir une copie de toutes vos données dans un format standard."
+          answer: "Oui, conformément au RGPD, vous avez le droit à la portabilité de vos données. Contactez-nous à contact@doude.app pour obtenir une copie de toutes vos données dans un format standard."
         }
       ]
     }
