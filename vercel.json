@@ -5,11 +5,5 @@
       "dest": "/",
       "status": 200
     }
-  ],
-  "functions": {
-    "server/webhooks/stripe.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  ]
 }
