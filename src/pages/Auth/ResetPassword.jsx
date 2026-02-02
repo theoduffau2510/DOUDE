@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../path/to/supabaseClient'; // Ajuste le chemin
+import { supabase } from '../../lib/supabase'
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('');
