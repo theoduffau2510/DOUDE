@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase'
+import { useNavigate } from 'react-router-dom'
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleResetRequest = async (e) => {
     e.preventDefault();
@@ -27,19 +29,23 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
-        <div>
-          <h2 className="text-3xl font-bold text-center">Mot de passe oublié</h2>
-          <p className="mt-2 text-center text-gray-600">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--cream)] px-5">
+      <div className="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl">
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="font-fraunces text-4xl text-[var(--espresso)] font-bold mb-3">
+            Mot de passe oublié ?
+          </h2>
+          <div className="w-12 h-1 bg-gradient-to-r from-[var(--caramel)] to-[var(--sand)] mx-auto my-4 rounded-sm" />
+          <p className="text-[var(--espresso-light)] text-[15px]">
             Entrez votre email pour recevoir un lien de réinitialisation
           </p>
         </div>
         
-        <form onSubmit={handleResetRequest} className="mt-8 space-y-6">
+        <form onSubmit={handleResetRequest} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
+            <label htmlFor="email" className="block text-sm font-semibold text-[var(--espresso)] mb-2">
+              Adresse email
             </label>
             <input
               id="email"
@@ -47,19 +53,19 @@ export default function ResetPassword() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border-2 border-[var(--sand)] rounded-xl focus:outline-none focus:border-[var(--caramel)] transition-colors text-[var(--espresso)]"
               placeholder="votre@email.com"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-[var(--coral)]/10 border-2 border-[var(--coral)] text-[var(--coral)] px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
 
           {message && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+            <div className="bg-[var(--sage)]/10 border-2 border-[var(--sage)] text-[var(--sage)] px-4 py-3 rounded-xl text-sm">
               {message}
             </div>
           )}
@@ -67,16 +73,19 @@ export default function ResetPassword() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full py-3 px-6 bg-[var(--espresso)] text-[var(--cream)] rounded-full font-semibold text-[15px] hover:bg-[var(--caramel)] transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Envoi...' : 'Envoyer le lien'}
+            {loading ? 'Envoi en cours...' : 'Envoyer le lien'}
           </button>
         </form>
 
-        <div className="text-center">
-          <a href="/login" className="text-sm text-blue-600 hover:text-blue-500">
-            Retour à la connexion
-          </a>
+        <div className="text-center mt-6">
+          <button
+            onClick={() => navigate('/SignIn')}
+            className="text-sm text-[var(--caramel)] hover:text-[var(--caramel-dark)] font-semibold transition-colors"
+          >
+            ← Retour à la connexion
+          </button>
         </div>
       </div>
     </div>

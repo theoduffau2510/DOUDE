@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 
@@ -35,23 +35,26 @@ export default function UpdatePassword() {
       setError(error.message);
     } else {
       alert('Mot de passe modifié avec succès !');
-      navigate('/login');
+      navigate('/SignIn');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
-        <div>
-          <h2 className="text-3xl font-bold text-center">Nouveau mot de passe</h2>
-          <p className="mt-2 text-center text-gray-600">
-            Choisissez un nouveau mot de passe
+    <div className="min-h-screen flex items-center justify-center bg-[var(--cream)] px-5">
+      <div className="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl">
+        <div className="text-center mb-8">
+          <h2 className="font-fraunces text-4xl text-[var(--espresso)] font-bold mb-3">
+            Nouveau mot de passe
+          </h2>
+          <div className="w-12 h-1 bg-gradient-to-r from-[var(--caramel)] to-[var(--sand)] mx-auto my-4 rounded-sm" />
+          <p className="text-[var(--espresso-light)] text-[15px]">
+            Choisissez un nouveau mot de passe sécurisé
           </p>
         </div>
         
-        <form onSubmit={handleUpdatePassword} className="mt-8 space-y-6">
+        <form onSubmit={handleUpdatePassword} className="space-y-5">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-semibold text-[var(--espresso)] mb-2">
               Nouveau mot de passe
             </label>
             <input
@@ -60,13 +63,13 @@ export default function UpdatePassword() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border-2 border-[var(--sand)] rounded-xl focus:outline-none focus:border-[var(--caramel)] transition-colors text-[var(--espresso)]"
               placeholder="Minimum 6 caractères"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[var(--espresso)] mb-2">
               Confirmer le mot de passe
             </label>
             <input
@@ -75,13 +78,13 @@ export default function UpdatePassword() {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border-2 border-[var(--sand)] rounded-xl focus:outline-none focus:border-[var(--caramel)] transition-colors text-[var(--espresso)]"
               placeholder="Retapez votre mot de passe"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-[var(--coral)]/10 border-2 border-[var(--coral)] text-[var(--coral)] px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
@@ -89,7 +92,7 @@ export default function UpdatePassword() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full py-3 px-6 bg-[var(--espresso)] text-[var(--cream)] rounded-full font-semibold text-[15px] hover:bg-[var(--caramel)] transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Modification...' : 'Modifier le mot de passe'}
           </button>
