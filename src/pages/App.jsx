@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
 import { useEffect } from 'react'
-import { supabase } from './lib/supabase'
+import { supabase } from '../lib/supabase'
 
 import Navbar from '../components/Navbar'
 import NavbarParent from '../components/NavbarParent'
