@@ -81,7 +81,7 @@ export default function ResetPassword() {
 
         <div className="text-center mt-6">
           <button
-            onClick={() => navigate('/SignIn.jsx')}
+            onClick={() => navigate('/sign-in')}
             className="text-sm text-[var(--caramel)] hover:text-[var(--caramel-dark)] font-semibold transition-colors"
           >
             ← Retour à la connexion

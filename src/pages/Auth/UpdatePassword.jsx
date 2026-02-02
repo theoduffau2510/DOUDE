@@ -35,7 +35,7 @@ export default function UpdatePassword() {
       setError(error.message);
     } else {
       alert('Mot de passe modifié avec succès !');
-      navigate('/SignIn.jsx');
+      navigate('/sign-in');
     }
   };
 
