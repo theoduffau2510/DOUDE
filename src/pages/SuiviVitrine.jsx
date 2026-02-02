@@ -587,12 +587,12 @@ const handleSignUp = () => {
             {[
               { icon: Star, title: "Notes & évaluations", desc: "Enregistrez toutes les notes et créez des évaluations personnalisées", tier: "gratuit" },
               { icon: Target, title: "Objectifs personnalisés", desc: "Définissez et suivez les objectifs de chaque élève", tier: "gratuit" },
-              { icon: TrendingUp, title: "Graphiques de progression", desc: "Visualisez l'évolution avec des graphiques clairs", tier: "pro" },
+              { icon: Award, title: "Upload de documents", desc: "Partagez des fiches et exercices avec vos élèves", tier: "gratuit" },
               { icon: BookOpen, title: "Historique complet", desc: "Accédez à l'historique de toutes les séances", tier: "gratuit" },
               { icon: CheckCircle, title: "Appréciations", desc: "Rédigez des appréciations pour chaque cours", tier: "gratuit" },
-              { icon: Award, title: "Upload de documents", desc: "Partagez des fiches et exercices avec vos élèves", tier: "gratuit" },
-              { icon: BarChart3, title: "Dashboard global", desc: "Vue d'ensemble de tous vos élèves", tier: "premium" },
+              { icon: TrendingUp, title: "Graphiques de progression", desc: "Visualisez l'évolution avec des graphiques clairs", tier: "pro" },
               { icon: LineChart, title: "Export PDF", desc: "Exportez les fiches élèves en PDF", tier: "pro" }, 
+              { icon: BarChart3, title: "Dashboard global", desc: "Vue d'ensemble de tous vos élèves", tier: "premium" },
               { icon: Smartphone, title: "Messagerie sécurisée", desc: "Communiquer en sécurité avec l'élève et sa famille", tier: "premium" }
             ].map((feature, idx) => (
               <div key={idx} className="p-6 bg-white rounded-2xl hover:shadow-xl transition-all duration-300 relative">
