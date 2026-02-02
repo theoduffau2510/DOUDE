@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
+import { useEffect } from 'react'
+import { supabase } from './lib/supabase'
 
 import Navbar from '../components/Navbar'
 import NavbarParent from '../components/NavbarParent'
@@ -174,6 +176,20 @@ function AppLayout() {
 }
 
 function App() {
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        console.log('🔄 Page visible - refresh session Supabase')
+        await supabase.auth.getSession()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
   return (
     <AuthProvider>
       <BrowserRouter>
