@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { Target, BookOpen, TrendingUp, Award, Star, Sparkles, LineChart, BarChart3, FileText, Download, MessageCircle, Loader2 } from 'lucide-react'
+import { Target, BookOpen, TrendingUp, Award, Star, Sparkles, LineChart, BarChart3, FileText, Download, MessageCircle, Loader2, Lock } from 'lucide-react'
 
 // Composant pour télécharger un PDF avec régénération d'URL si nécessaire
 function PdfDownloadItem({ pdf }) {
@@ -62,7 +62,26 @@ function PdfDownloadItem({ pdf }) {
 }
 
 // Composant graphique pour la courbe de progression
-function ProgressChart({ notes, objectif }) {
+function ProgressChart({ notes, objectif, showChart }) {
+  // ✅ NOUVEAU : Vérifier si le graphique doit être affiché
+  if (!showChart) {
+    return (
+      <div className="bg-[var(--cream)] rounded-2xl p-6 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10">
+          <div className="text-center">
+            <Lock className="mx-auto mb-3 text-[var(--espresso-light)]" size={40} />
+            <p className="text-sm text-[var(--espresso)] font-semibold">Courbe de progression désactivée</p>
+          </div>
+        </div>
+        <div className="h-40 flex items-end justify-around gap-2 opacity-30">
+          {[40, 55, 45, 60, 70, 65, 75].map((h, i) => (
+            <div key={i} className="w-8 bg-[var(--sage)] rounded-t" style={{ height: `${h}%` }} />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   if (!notes || notes.length === 0) {
     return (
       <div className="bg-[var(--cream)] rounded-2xl p-6 text-center">
@@ -360,15 +379,21 @@ export default function SuiviParent() {
               </div>
             </div>
 
-            {/* Courbe de progression */}
+            {/* ✅ Courbe de progression avec vérification du flag */}
             <div>
               <h3 className="font-fraunces text-2xl text-[var(--espresso)] font-bold mb-4 flex items-center gap-2">
                 <LineChart className="text-[var(--sage)]" size={28} />
                 Courbe de progression
+                {!student.show_progress_chart && (
+                  <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-normal">
+                    Désactivée
+                  </span>
+                )}
               </h3>
               <ProgressChart
                 notes={student.notes}
                 objectif={student.objectif || 14}
+                showChart={student.show_progress_chart === true}
               />
             </div>
 
@@ -385,8 +410,8 @@ export default function SuiviParent() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {[...student.notes].sort((a, b) => new Date(b.date) - new Date(a.date)).map((note) => (
-                    <div key={note.id} className="bg-[var(--cream)] rounded-2xl p-5 flex justify-between items-center hover:shadow-md transition-shadow">
+                  {[...student.notes].sort((a, b) => new Date(b.date) - new Date(a.date)).map((note, index) => (
+                    <div key={note.id || `${note.date}-${note.note}-${index}`} className="bg-[var(--cream)] rounded-2xl p-5 flex justify-between items-center hover:shadow-md transition-shadow">
                       <div className="flex items-center gap-4">
                         <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
                           note.note >= (student.objectif || 14) ? 'bg-[var(--sage)]/20 text-[var(--sage)]' :

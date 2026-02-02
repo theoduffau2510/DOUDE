@@ -376,6 +376,14 @@ const handleSignUp = () => {
                   </span>
                 </div>
 
+                {/* ✅ NOUVEAU : Activer/Désactiver courbe (Tous) */}
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50">
+                  <CheckCircle className="text-green-600" size={20} />
+                  <span className="text-sm text-[var(--espresso)]">
+                    Activer/désactiver courbe
+                  </span>
+                </div>
+
                 {/* Export PDF (Pro+) */}
                 <div className={`flex items-center gap-3 p-3 rounded-xl ${
                   hasFeature("pdfExport") ? "bg-green-50" : "bg-gray-50"
@@ -395,7 +403,7 @@ const handleSignUp = () => {
                   )}
                 </div>
 
-                {/* Courbe de progression (Pro+) */}
+                {/* Courbe de progression AUTO (Pro+) */}
                 <div className={`flex items-center gap-3 p-3 rounded-xl ${
                   hasFeature("progressChart") ? "bg-green-50" : "bg-gray-50"
                 }`}>
@@ -405,7 +413,7 @@ const handleSignUp = () => {
                     <Lock className="text-gray-400" size={20} />
                   )}
                   <span className={`text-sm ${hasFeature("progressChart") ? "text-[var(--espresso)]" : "text-gray-400"}`}>
-                    Courbe de progression
+                    Courbe automatique
                   </span>
                   {!hasFeature("progressChart") && (
                     <span className="ml-auto text-xs px-2 py-1 bg-[var(--caramel)] text-white rounded-full">
@@ -488,9 +496,14 @@ const handleSignUp = () => {
                   <CheckCircle className="text-green-600 mt-1 flex-shrink-0" size={20} />
                   <span className="text-sm text-[var(--espresso)]">Upload de documents (20 Mo max)</span>
                 </li>
+                {/* ✅ NOUVEAU */}
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="text-green-600 mt-1 flex-shrink-0" size={20} />
+                  <span className="text-sm text-[var(--espresso)]">Activer/désactiver la courbe</span>
+                </li>
                 <li className="flex items-start gap-3 opacity-40">
                   <Lock className="text-gray-400 mt-1 flex-shrink-0" size={20} />
-                  <span className="text-sm text-gray-400">Courbe de progression</span>
+                  <span className="text-sm text-gray-400">Courbe automatiquement activée</span>
                 </li>
                 <li className="flex items-start gap-3 opacity-40">
                   <Lock className="text-gray-400 mt-1 flex-shrink-0" size={20} />
@@ -516,7 +529,7 @@ const handleSignUp = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="text-white mt-1 flex-shrink-0" size={20} />
-                  <span className="text-sm">Courbe de progression</span>
+                  <span className="text-sm">Courbe toujours activée</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="text-white mt-1 flex-shrink-0" size={20} />
