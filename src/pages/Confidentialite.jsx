@@ -51,10 +51,6 @@ export default function Confidentialite() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[var(--caramel)]">•</span>
-                  <span><strong>Données bancaires :</strong> RIB/IBAN (pour la facturation de vos clients)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[var(--caramel)]">•</span>
                   <span><strong>Données de connexion :</strong> adresse IP, type de navigateur, pages visitées</span>
                 </li>
               </ul>

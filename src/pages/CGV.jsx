@@ -83,11 +83,14 @@ export default function CGV() {
             <h2 className="font-fraunces text-xl font-bold mb-4 text-[var(--espresso)]">Article 4 - Période d'essai</h2>
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <p className="text-[var(--espresso-light)] leading-relaxed">
-                Une période d'essai gratuite de 14 jours est offerte pour les formules Premium et Pro.
-                Durant cette période, l'Utilisateur bénéficie de l'intégralité des fonctionnalités
-                de la formule choisie. À l'issue de la période d'essai, l'abonnement est automatiquement
-                activé, sauf résiliation par l'Utilisateur avant la fin de la période d'essai.
-              </p>
+  Une période d'essai gratuite de 14 jours est offerte pour les formules 
+  Premium et Pro. <strong>Une carte bancaire est requise lors de l'inscription</strong>, 
+  mais aucun prélèvement ne sera effectué pendant la période d'essai. Durant 
+  cette période, l'Utilisateur bénéficie de l'intégralité des fonctionnalités 
+  de la formule choisie. À l'issue de la période d'essai, l'abonnement est 
+  automatiquement activé et le premier paiement est effectué, sauf résiliation 
+  par l'Utilisateur avant la fin de la période d'essai.
+</p>
             </div>
           </section>
 

@@ -139,6 +139,9 @@ router.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'subscription',
+      subscription_data: {
+    trial_period_days: 14,
+  },
       success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/tarifs`,
       locale: 'fr',
