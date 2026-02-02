@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buffer } from 'micro'; // ✅ AJOUTER CETTE LIGNE
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,12 +9,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ CRITIQUE : Désactiver le bodyParser pour Stripe
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Supabase Admin Client
 let supabaseAdmin = null;
@@ -39,21 +33,26 @@ const PRICE_TO_TIER = {
   'price_1SuAEWFEu2lrL216eLG8DOiB': 'premium'
 };
 
+// ✅ FORMAT EXPRESS (pas Next.js)
 export default async function stripeWebhook(req, res) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
+  console.log('🎯 === DÉBUT WEBHOOK ===');
+  
   try {
-    // ✅ CORRECTION : Lire le buffer brut avec micro
-    const buf = await buffer(req);
+    // ✅ Express.raw() a déjà mis le buffer dans req.body
     const sig = req.headers['stripe-signature'];
+    
+    console.log('📦 Buffer reçu:', req.body?.length || 0, 'bytes');
+    console.log('🔑 Signature:', sig ? 'présente' : 'MANQUANTE');
+    
     let event;
 
     try {
       event = stripe.webhooks.constructEvent(
-        buf,
+        req.body,  // ✅ Déjà un Buffer grâce à express.raw()
         sig,
         process.env.STRIPE_WEBHOOK_SECRET
       );
+      console.log('✅ Signature valide');
     } catch (err) {
       console.error('❌ Webhook signature invalide:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -239,11 +238,12 @@ export default async function stripeWebhook(req, res) {
         console.log('ℹ️ Événement non géré:', event.type);
     }
 
-    res.json({ received: true });
+    console.log('🎯 === FIN WEBHOOK (SUCCESS) ===');
+    return res.status(200).json({ received: true });
     
   } catch (error) {
     console.error('❌ Erreur globale webhook:', error);
-    // Retourner 200 pour éviter les retry infinis
-    res.status(200).json({ error: error.message });
+    console.error('Stack:', error.stack);
+    return res.status(400).json({ error: error.message });
   }
 }
