@@ -6,12 +6,12 @@ import { stripeAPI, handleAPIError } from '../lib/api';
 
 // Tes Price IDs Stripe (tier_periode: priceId)
 const STRIPE_PRICES = {
-  gratuit_monthly: 'price_1SuACOFEu2lrL216y4C6PbuP',
-  gratuit_yearly: 'price_1SuADVFEu2lrL216SQm5agHc',
-  pro_monthly: 'price_1SuACnFEu2lrL216xouwXPm0',
-  pro_yearly: 'price_1SuADhFEu2lrL21638mz6Oij',
-  premium_monthly: 'price_1SuAD4FEu2lrL2160uwZdxG4',
-  premium_yearly: 'price_1SuAEWFEu2lrL216eLG8DOiB'
+  gratuit_monthly: 'price_1SwNdsFSyMXEe0X7Wd46Qrok',
+  gratuit_yearly: 'price_1SwNeGFSyMXEe0X72bi92I0F',
+  pro_monthly: 'price_1SwNecFSyMXEe0X7DgtMYDSs',
+  pro_yearly: 'price_1SwNf9FSyMXEe0X7IEmQgSBp',
+  premium_monthly: 'price_1SwNfQFSyMXEe0X7BvRNgApe',
+  premium_yearly: 'price_1SwNfdFSyMXEe0X74z6DNY0b'
 }
 
 // Fonction pour créer une session Stripe
