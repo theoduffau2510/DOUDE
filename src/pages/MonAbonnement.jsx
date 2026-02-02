@@ -53,41 +53,72 @@ export default function MonAbonnement() {
   }
 
   // Calculer l'espace de stockage utilisé
-  const fetchStorageUsed = async () => {
-    try {
-      setStorageLoading(true)
+ const fetchStorageUsed = async () => {
+  try {
+    setStorageLoading(true)
 
-      // Récupérer tous les élèves avec leurs PDFs
-      const { data: students, error } = await supabase
-        .from('students')
-        .select('pdfs')
-        .eq('user_id', user.id)
+    console.log('🔍 === CALCUL STORAGE ===')
+    console.log('User ID:', user.id)
 
-      if (error) throw error
+    // Récupérer tous les élèves avec leurs PDFs
+    const { data: students, error } = await supabase
+      .from('students')
+      .select('pdfs')
+      .eq('user_id', user.id)
 
-      // Calculer la taille totale des PDFs
-      let totalSize = 0
+    console.log('📚 Nombre d\'élèves trouvés:', students?.length)
+    console.log('📄 Données complètes:', JSON.stringify(students, null, 2))
 
-      if (students) {
-        for (const student of students) {
-          if (student.pdfs && Array.isArray(student.pdfs)) {
-            for (const pdf of student.pdfs) {
-              if (pdf.size) {
-                totalSize += pdf.size
-              }
+    if (error) {
+      console.error('❌ Erreur Supabase:', error)
+      throw error
+    }
+
+    // Calculer la taille totale des PDFs
+    let totalSize = 0
+
+    if (students) {
+      for (const student of students) {
+        console.log('👤 Élève:', student)
+        console.log('   PDFs:', student.pdfs)
+        console.log('   Est un array?', Array.isArray(student.pdfs))
+        
+        if (student.pdfs && Array.isArray(student.pdfs)) {
+          console.log('   Nombre de PDFs:', student.pdfs.length)
+          
+          for (const pdf of student.pdfs) {
+            console.log('   📎 PDF:', {
+              name: pdf.name,
+              size: pdf.size,
+              type: typeof pdf.size
+            })
+            
+            if (pdf.size) {
+              totalSize += pdf.size
+              console.log('   ✅ Ajouté:', pdf.size, 'bytes. Total:', totalSize)
+            } else {
+              console.log('   ⚠️ Pas de taille pour ce PDF')
             }
           }
+        } else {
+          console.log('   ⚠️ Pas de PDFs ou pas un array')
         }
       }
-
-      setStorageUsed(totalSize)
-    } catch (err) {
-      console.error('Erreur calcul stockage:', err)
-      throw err
-    } finally {
-      setStorageLoading(false)
     }
+
+    console.log('📊 === RÉSULTAT FINAL ===')
+    console.log('Total bytes:', totalSize)
+    console.log('Total Mo:', (totalSize / (1024 * 1024)).toFixed(2))
+    console.log('========================')
+
+    setStorageUsed(totalSize)
+  } catch (err) {
+    console.error('❌ Erreur calcul stockage:', err)
+    throw err
+  } finally {
+    setStorageLoading(false)
   }
+}
 
   const fetchStudentCount = async () => {
     const { count, error } = await supabase

@@ -25,9 +25,17 @@ function getSupabaseAdmin() {
   }
   return supabaseAdmin;
 }
-
 // Mapping des price IDs vers les tiers
 const PRICE_TO_TIER = {
+  // ✅ PRODUCTION (LIVE)
+  'price_1SwNdsFSyMXEe0X7Wd46Qrok': 'gratuit',
+  'price_1SwNeGFSyMXEe0X72bi92I0F': 'gratuit',
+  'price_1SwNecFSyMXEe0X7DgtMYDSs': 'pro',
+  'price_1SwNf9FSyMXEe0X7IEmQgSBp': 'pro',
+  'price_1SwNfQFSyMXEe0X7BvRNgApe': 'premium',
+  'price_1SwNfdFSyMXEe0X74z6DNY0b': 'premium',
+  
+  // TEST (pour compatibilité)
   'price_1SuACOFEu2lrL216y4C6PbuP': 'gratuit',
   'price_1SuADVFEu2lrL216SQm5agHc': 'gratuit',
   'price_1SuACnFEu2lrL216xouwXPm0': 'pro',
