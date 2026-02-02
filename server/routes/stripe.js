@@ -319,9 +319,11 @@ router.post('/create-portal-session', async (req, res) => {
 
     // Créer la session du portail client
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: user.stripe_customer_id,
-      return_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/abonnement`,
-    });
+  customer: typeof user.stripe_customer_id === 'string' && user.stripe_customer_id.startsWith('{') 
+    ? JSON.parse(user.stripe_customer_id).id 
+    : user.stripe_customer_id,  // ✅ Parse le JSON si nécessaire
+  return_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/abonnement`,
+});
 
     console.log('✅ Portal session créée');
     res.json({ url: portalSession.url });
