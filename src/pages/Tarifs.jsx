@@ -194,7 +194,7 @@ useEffect(() => {
           <p className="text-[var(--espresso-light)] text-sm mb-6 leading-relaxed">L'essentiel pour les professeurs actifs.</p>
           <div className="mb-8 pb-8 border-b border-[var(--cream-dark)]">
             <div className="font-fraunces text-5xl text-[var(--espresso)] font-bold leading-none">
-              {billingPeriod === 'monthly' ? '5.99€' : '60€'} 
+              {billingPeriod === 'monthly' ? '5,99€' : '60€'} 
               <span className="text-lg font-medium text-[var(--espresso-light)]">
                 {billingPeriod === 'monthly' ? ' / mois' : ' / an'}
               </span>
@@ -239,7 +239,7 @@ useEffect(() => {
           <p className="text-[var(--espresso-light)] text-sm mb-6 leading-relaxed">Pour les professeurs à temps plein.</p>
           <div className="mb-8 pb-8 border-b border-[var(--cream-dark)]">
             <div className="font-fraunces text-5xl text-[var(--espresso)] font-bold leading-none">
-              {billingPeriod === 'monthly' ? '8.99€' : '90€'} 
+              {billingPeriod === 'monthly' ? '8,99€' : '90€'} 
               <span className="text-lg font-medium text-[var(--espresso-light)]">
                 {billingPeriod === 'monthly' ? ' / mois' : ' / an'}
               </span>

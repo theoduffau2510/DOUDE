@@ -299,7 +299,7 @@ export default function Home() {
               {
                 name: "Pro",
                 tagline: "Le plus populaire",
-                price: "5.99",
+                price: "5,99",
                 annual: "60€/an (2 mois offerts)",
                 features: ["Jusqu'à 6 élèves", "Upload des PDF", "Emploi du temps avancé", "Support email 48h"],
                 cta: "Essayer 14 jours gratuit",
@@ -308,7 +308,7 @@ export default function Home() {
               {
                 name: "Premium",
                 tagline: "Pour les professionnels",
-                price: "8.99",
+                price: "8,99",
                 annual: "90€/an (2 mois offerts)",
                 features: ["Élèves illimités", "Upload de PDF", "Statistiques avancées", "Support prioritaire <24h"],
                 cta: "En savoir plus",
