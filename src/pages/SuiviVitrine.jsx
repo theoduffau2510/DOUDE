@@ -36,13 +36,13 @@ const handleSignUp = () => {
       derniereNote: 14,
       seances: 18,
       appreciation: "Bon travail. Les concepts de forces sont maintenant acquis.",
-      notes: [11, 11.5, 12, 13, 12.5, 14, 14],
+      notes: [11, 17, 8, 13, 15.5, 17, 19],
       tier: "pro",
       tierLabel: "PRO",
       tierColor: "caramel"
     },
     {
-      nom: "Emma Leroy",
+      nom: "Wahib Khaoui",
       niveau: "Seconde",
       matiere: "Mathématiques",
       moyenne: 13.2,
@@ -51,7 +51,7 @@ const handleSignUp = () => {
       derniereNote: 13.5,
       seances: 12,
       appreciation: "Progrès réguliers. Continue les exercices sur les équations.",
-      notes: [12.5, 13, 12, 13.5, 14, 13, 13.5],
+      notes: [4, 6, 11, 13.5, 17, 5, 19.5],
       tier: "premium",
       tierLabel: "PREMIUM",
       tierColor: "sage"
