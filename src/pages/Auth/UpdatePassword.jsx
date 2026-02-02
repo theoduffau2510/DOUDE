@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../path/to/supabaseClient';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom'
 
 export default function UpdatePassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -35,7 +35,7 @@ export default function UpdatePassword() {
       setError(error.message);
     } else {
       alert('Mot de passe modifié avec succès !');
-      router.push('/login');
+      navigate('/login');
     }
   };
 
