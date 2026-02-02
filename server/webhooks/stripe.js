@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buffer } from 'micro';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,7 +43,7 @@ export default async function stripeWebhook(req, res) {
 
   try {
     // ⚠️ CHANGÉ : Utiliser buffer au lieu de req.body
-    const buf = await buffer(req);
+    const buf = req.body;
     const sig = req.headers['stripe-signature'];
     let event;
 
