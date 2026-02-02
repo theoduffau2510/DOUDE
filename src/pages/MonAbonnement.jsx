@@ -345,7 +345,7 @@ export default function MonAbonnement() {
               {(tier === 'pro' || tier === 'premium') && (
                 <button
                   onClick={async () => {
-                    if (confirm('Êtes-vous sûr de vouloir gérer votre abonnement ?')) {
+                    if (confirm('Êtes-vous sûr de vouloir résilier votre abonnement ?')) {
                       const { data, error } = await stripeAPI.createPortalSession(user.id);
                       if (error) {
                         alert(`Erreur: ${error}`);
@@ -358,7 +358,7 @@ export default function MonAbonnement() {
                   }}
                   className="py-3 px-6 bg-transparent border-2 border-red-400 text-red-500 rounded-2xl font-semibold text-sm hover:bg-red-50 transition-all flex items-center gap-2 justify-center"
                 >
-                  Gérer mon abonnement
+                  Résilier mon abonnement
                 </button>
               )}
             </div>
