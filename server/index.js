@@ -66,7 +66,7 @@ const limiter = rateLimit({
 
 // ⚠️ IMPORTANT : Webhook AVANT express.json()
 // Stripe a besoin du raw body pour vérifier la signature
-app.use('/api/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+app.post('/api/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 
 // CORS
 app.use(cors(corsOptions));
