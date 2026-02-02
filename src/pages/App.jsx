@@ -176,6 +176,7 @@ function AppLayout() {
 }
 
 function App() {
+  // ✅ PREMIER useEffect
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible') {
@@ -190,6 +191,35 @@ function App() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
+
+  // ✅ DEUXIÈME useEffect
+  useEffect(() => {
+    let inactivityTimer
+
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer)
+      inactivityTimer = setTimeout(() => {
+        console.log('🔄 Inactivité détectée - refresh session')
+        supabase.auth.getSession()
+      }, 30000) // 30 secondes
+    }
+
+    // Reset timer sur chaque interaction
+    window.addEventListener('click', resetTimer)
+    window.addEventListener('keypress', resetTimer)
+    window.addEventListener('scroll', resetTimer)
+    
+    resetTimer() // Init
+
+    return () => {
+      clearTimeout(inactivityTimer)
+      window.removeEventListener('click', resetTimer)
+      window.removeEventListener('keypress', resetTimer)
+      window.removeEventListener('scroll', resetTimer)
+    }
+  }, [])
+
+  // ✅ RETURN (UNE SEULE FOIS)
   return (
     <AuthProvider>
       <BrowserRouter>
