@@ -101,6 +101,15 @@ export default function SignIn() {
                   placeholder="Votre mot de passe"
                 />
               </div>
+              {/* ⬇️ NOUVEAU : Lien mot de passe oublié */}
+              <div className="text-right mt-2">
+                <Link 
+                  to="/reset-password" 
+                  className="text-sm text-[var(--caramel)] hover:underline"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
             </div>
 
             <button
