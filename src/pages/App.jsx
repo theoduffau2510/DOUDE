@@ -26,6 +26,8 @@ import SuiviParent from './SuiviParent.jsx'
 import MonAbonnement from './MonAbonnement.jsx'
 import SignUp from './Auth/SignUp.jsx'
 import SignIn from './Auth/SignIn.jsx'
+import ResetPassword from './Auth/ResetPassword.jsx'  // ⬅️ CORRIGÉ
+import UpdatePassword from './Auth/UpdatePassword.jsx'  // ⬅️ CORRIGÉ
 import Success from './Success.jsx'
 
 import SuiviVitrine from './SuiviVitrine.jsx'
@@ -66,7 +68,10 @@ function AppLayout() {
   }
 
   // Détecter si on est sur une page d'authentification
-  const isAuthPage = location.pathname.includes('sign-in') || location.pathname.includes('sign-up')
+  const isAuthPage = location.pathname.includes('sign-in') || 
+                     location.pathname.includes('sign-up') ||
+                     location.pathname.includes('reset-password') ||  // ⬅️ AJOUTÉ
+                     location.pathname.includes('update-password')    // ⬅️ AJOUTÉ
 
   // Vérifier si l'utilisateur est un élève
   const isStudent = user?.user_metadata?.role === 'eleve'
@@ -118,18 +123,20 @@ function AppLayout() {
           </StudentRedirect>
         } />
 
-<Route 
-  path="/admin/dashboard" 
-  element={
-    <ProtectedAdminRoute>
-      <AdminDashboard />
-    </ProtectedAdminRoute>
-  } 
-/>
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedAdminRoute>
+              <AdminDashboard />
+            </ProtectedAdminRoute>
+          } 
+        />
 
         {/* ROUTES AUTH */}
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/sign-in" element={<SignIn />} />
+        <Route path="/reset-password" element={<ResetPassword />} />  {/* ⬅️ AJOUTÉ */}
+        <Route path="/update-password" element={<UpdatePassword />} />  {/* ⬅️ AJOUTÉ */}
         <Route path="/success" element={<Success />} />
         
         {/* ROUTES PARENT - PROTÉGÉES */}
@@ -156,6 +163,7 @@ function AppLayout() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/aide" element={<Aide />} />
       </Routes>
+      
       
       {/* Footer (sauf pages auth) */}
       {!isAuthPage && <Footer />}
