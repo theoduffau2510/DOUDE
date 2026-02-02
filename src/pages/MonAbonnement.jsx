@@ -1,3 +1,6 @@
+
+Copier
+
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -18,7 +21,8 @@ import {
   Repeat,
   Bell,
   ArrowRight,
-  Loader2
+  Loader2,
+  Sparkles
 } from 'lucide-react'
 
 export default function MonAbonnement() {
@@ -29,13 +33,27 @@ export default function MonAbonnement() {
   const [storageUsed, setStorageUsed] = useState(0)
   const [storageLoading, setStorageLoading] = useState(true)
   const [studentCount, setStudentCount] = useState(0)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (user) {
-      fetchStorageUsed()
-      fetchStudentCount()
+      fetchData()
     }
   }, [user])
+
+  // Fonction pour tout recharger (fix du bug de timeout)
+  const fetchData = async () => {
+    try {
+      setError(null)
+      await Promise.all([
+        fetchStorageUsed(),
+        fetchStudentCount()
+      ])
+    } catch (err) {
+      console.error('Erreur chargement données:', err)
+      setError('Erreur de chargement. Actualisez la page.')
+    }
+  }
 
   // Calculer l'espace de stockage utilisé
   const fetchStorageUsed = async () => {
@@ -59,20 +77,6 @@ export default function MonAbonnement() {
             for (const pdf of student.pdfs) {
               if (pdf.size) {
                 totalSize += pdf.size
-              } else if (pdf.path) {
-                // Si pas de taille stockée, essayer de la récupérer
-                try {
-                  const { data: fileData } = await supabase.storage
-                    .from('student-documents')
-                    .list(pdf.path.split('/').slice(0, -1).join('/'), {
-                      search: pdf.path.split('/').pop()
-                    })
-                  if (fileData && fileData[0]?.metadata?.size) {
-                    totalSize += fileData[0].metadata.size
-                  }
-                } catch {
-                  // Ignorer les erreurs
-                }
               }
             }
           }
@@ -82,17 +86,19 @@ export default function MonAbonnement() {
       setStorageUsed(totalSize)
     } catch (err) {
       console.error('Erreur calcul stockage:', err)
+      throw err
     } finally {
       setStorageLoading(false)
     }
   }
 
   const fetchStudentCount = async () => {
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from('students')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
 
+    if (error) throw error
     setStudentCount(count || 0)
   }
 
@@ -198,8 +204,8 @@ export default function MonAbonnement() {
       name: 'Gratuit',
       price: '0€',
       period: 'pour toujours',
-      color: 'gray-500',
-      bgColor: 'bg-gray-100',
+      color: 'sand',
+      icon: '☕',
       features: ['3 élèves maximum', 'Gestion des créneaux', 'Upload PDF (20 Mo)', 'Historique 3 mois']
     },
     {
@@ -208,9 +214,9 @@ export default function MonAbonnement() {
       price: '8,99€',
       period: 'par mois',
       color: 'caramel',
-      bgColor: 'bg-[var(--caramel)]',
+      icon: '🚀',
       popular: true,
-      features: ['8 élèves maximum', 'Multi-sélection', 'Notifications', 'Courbe de progression', 'Export PDF', 'Upload PDF (1 Go)', 'Historique 12 mois']
+      features: ['8 élèves maximum', 'Multi-sélection', 'Notifications', 'Courbe de progression', 'Export PDF', 'Upload PDF (1 Go)']
     },
     {
       id: 'premium',
@@ -218,8 +224,8 @@ export default function MonAbonnement() {
       price: '12,99€',
       period: 'par mois',
       color: 'sage',
-      bgColor: 'bg-[var(--sage)]',
-      features: ['Élèves illimités', 'Tout Pro inclus', 'Récurrence hebdo', 'Stats avancées', 'Dashboard global', 'Messagerie', 'Upload illimité', 'Historique illimité']
+      icon: '👑',
+      features: ['Élèves illimités', 'Tout Pro inclus', 'Récurrence hebdo', 'Stats avancées', 'Dashboard global', 'Messagerie']
     }
   ]
 
@@ -227,7 +233,7 @@ export default function MonAbonnement() {
     switch (tier) {
       case 'premium': return 'bg-[var(--sage)] text-white'
       case 'pro': return 'bg-[var(--caramel)] text-white'
-      default: return 'bg-gray-500 text-white'
+      default: return 'bg-[var(--sand)] text-[var(--espresso)]'
     }
   }
 
@@ -256,17 +262,30 @@ export default function MonAbonnement() {
           </h1>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
+            <p className="text-red-700 text-sm">{error}</p>
+            <button
+              onClick={fetchData}
+              className="text-red-700 font-semibold text-sm hover:underline"
+            >
+              Réessayer
+            </button>
+          </div>
+        )}
+
         {/* Current Plan Card */}
         <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-black/5 mb-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex items-center gap-6">
               <div className={`w-20 h-20 rounded-2xl flex items-center justify-center ${
                 tier === 'premium' ? 'bg-[var(--sage)]/10' :
-                tier === 'pro' ? 'bg-[var(--caramel)]/10' : 'bg-gray-100'
+                tier === 'pro' ? 'bg-[var(--caramel)]/10' : 'bg-[var(--sand)]/30'
               }`}>
                 <Crown className={`${
                   tier === 'premium' ? 'text-[var(--sage)]' :
-                  tier === 'pro' ? 'text-[var(--caramel)]' : 'text-gray-500'
+                  tier === 'pro' ? 'text-[var(--caramel)]' : 'text-[var(--sand)]'
                 }`} size={40} />
               </div>
               <div>
@@ -289,31 +308,31 @@ export default function MonAbonnement() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => navigate('/tarifs')}
-                className="py-4 px-8 bg-gradient-to-r from-[var(--caramel)] to-[var(--sage)] text-white rounded-2xl font-bold text-base hover:shadow-xl transition-all flex items-center gap-2 justify-center"
+                className="py-4 px-8 bg-gradient-to-r from-[var(--caramel)] to-[var(--sage)] text-white rounded-2xl font-bold text-base hover:shadow-xl transition-all flex items-center gap-2 justify-center whitespace-nowrap"
               >
                 <ArrowRight size={20} />
                 Modifier mon abonnement
               </button>
 
               {(tier === 'pro' || tier === 'premium') && (
-  <button
-    onClick={async () => {
-      if (confirm('Êtes-vous sûr de vouloir gérer votre abonnement ?')) {
-        const { data, error } = await stripeAPI.createPortalSession(user.id);
-        if (error) {
-          alert(`Erreur: ${error}`);
-          return;
-        }
-        if (data?.url) {
-          window.location.href = data.url;
-        }
-      }
-    }}
-    className="py-3 px-6 bg-transparent border-2 border-red-400 text-red-500 rounded-2xl font-semibold text-sm hover:bg-red-50 transition-all flex items-center gap-2 justify-center"
-  >
-    Gérer mon abonnement
-  </button>
-)}
+                <button
+                  onClick={async () => {
+                    if (confirm('Êtes-vous sûr de vouloir gérer votre abonnement ?')) {
+                      const { data, error } = await stripeAPI.createPortalSession(user.id);
+                      if (error) {
+                        alert(`Erreur: ${error}`);
+                        return;
+                      }
+                      if (data?.url) {
+                        window.location.href = data.url;
+                      }
+                    }
+                  }}
+                  className="py-3 px-6 bg-transparent border-2 border-red-400 text-red-500 rounded-2xl font-semibold text-sm hover:bg-red-50 transition-all flex items-center gap-2 justify-center"
+                >
+                  Gérer mon abonnement
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -417,75 +436,112 @@ export default function MonAbonnement() {
               </div>
             ))}
           </div>
-      
         </div>
 
-        {/* Upgrade Section */}
+        {/* Upgrade Section with New Design */}
         {tier !== 'premium' && (
-          <div className="bg-gradient-to-br from-[var(--espresso)] to-[var(--espresso)]/80 rounded-[2.5rem] p-8 text-white">
-            <h3 className="font-fraunces text-2xl font-bold mb-4 text-center">
+          <div>
+            <h3 className="font-fraunces text-2xl font-bold text-[var(--espresso)] mb-2 text-center">
               Débloquez plus de fonctionnalités
             </h3>
-            <p className="text-center text-white/80 mb-8">
+            <p className="text-center text-[var(--espresso-light)] mb-8">
               Passez à une formule supérieure pour profiter de toutes les fonctionnalités
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {plans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className={`rounded-2xl p-6 relative ${
-                    plan.id === tier
-                      ? 'bg-white/10 border-2 border-white/30'
-                      : 'bg-white/5 hover:bg-white/10 transition-all'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--caramel)] text-white px-3 py-1 rounded-full text-xs font-bold">
-                      POPULAIRE
-                    </div>
-                  )}
+              {plans.map((plan) => {
+                const isCurrentPlan = plan.id === tier
+                const cardColor = plan.id === 'premium' ? 'sage' : plan.id === 'pro' ? 'caramel' : 'sand'
+                
+                return (
+                  <div
+                    key={plan.id}
+                    className={`
+                      relative bg-white rounded-[2rem] p-6 shadow-lg
+                      transition-all duration-300
+                      ${isCurrentPlan ? 'ring-4 ring-[var(--' + cardColor + ')] scale-105' : 'hover:shadow-xl hover:-translate-y-1'}
+                      ${plan.popular && !isCurrentPlan ? 'ring-2 ring-[var(--caramel)]/30' : ''}
+                    `}
+                  >
+                    {/* Badge Populaire */}
+                    {plan.popular && !isCurrentPlan && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--caramel)] text-white px-4 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <Sparkles size={12} />
+                        POPULAIRE
+                      </div>
+                    )}
 
-                  <div className="text-center mb-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 ${
-                      plan.id === 'premium' ? 'bg-[var(--sage)]' :
-                      plan.id === 'pro' ? 'bg-[var(--caramel)]' : 'bg-gray-500'
-                    }`}>
-                      {plan.name.toUpperCase()}
-                    </span>
-                    <div className="font-fraunces text-3xl font-bold">{plan.price}</div>
-                    <p className="text-white/60 text-sm">{plan.period}</p>
+                    {/* Badge Plan Actuel */}
+                    {isCurrentPlan && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--sage)] text-white px-4 py-1 rounded-full text-xs font-bold">
+                        FORMULE ACTUELLE
+                      </div>
+                    )}
+
+                    {/* Icon */}
+                    <div className="flex justify-center mb-4">
+                      <div className={`
+                        w-16 h-16 rounded-2xl flex items-center justify-center text-3xl
+                        bg-[var(--${cardColor})]/10
+                      `}>
+                        {plan.icon}
+                      </div>
+                    </div>
+
+                    {/* Name */}
+                    <div className="text-center mb-2">
+                      <span className={`
+                        inline-block px-3 py-1 rounded-full text-xs font-bold
+                        bg-[var(--${cardColor})] text-white
+                      `}>
+                        {plan.name.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="text-center mb-6">
+                      <div className="font-fraunces text-4xl font-bold text-[var(--espresso)]">
+                        {plan.price}
+                      </div>
+                      <p className="text-[var(--espresso-light)] text-sm">{plan.period}</p>
+                    </div>
+
+                    {/* Features */}
+                    <ul className="space-y-3 mb-6">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-[var(--espresso-light)]">
+                          <CheckCircle size={18} className={`text-[var(--${cardColor})] flex-shrink-0 mt-0.5`} />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA Button */}
+                    {isCurrentPlan ? (
+                      <div className={`
+                        py-3 px-4 rounded-xl text-center text-sm font-semibold
+                        bg-[var(--${cardColor})]/10 text-[var(--${cardColor})]
+                      `}>
+                        Formule actuelle
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => navigate('/tarifs')}
+                        className={`
+                          w-full py-3 px-4 rounded-xl text-center text-sm font-bold
+                          transition-all
+                          ${plan.id === 'gratuit' 
+                            ? 'bg-[var(--sand)] text-[var(--espresso)] hover:bg-[var(--sand)]/80' 
+                            : `bg-[var(--${cardColor})] text-white hover:bg-[var(--${cardColor})]/90 hover:shadow-lg`
+                          }
+                        `}
+                      >
+                        {plan.id === 'gratuit' ? 'Voir les détails' : 'Choisir ' + plan.name}
+                      </button>
+                    )}
                   </div>
-
-                  <ul className="space-y-2 mb-6">
-                    {plan.features.slice(0, 4).map((f, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-sm">
-                        <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {plan.id === tier ? (
-                    <div className="py-3 px-4 bg-white/20 rounded-xl text-center text-sm font-semibold">
-                      Formule actuelle
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/tarifs')}
-                      className={`w-full py-3 px-4 rounded-xl text-center text-sm font-bold transition-all ${
-                        plan.id === 'premium'
-                          ? 'bg-[var(--sage)] hover:bg-[var(--sage)]/90'
-                          : plan.id === 'pro'
-                          ? 'bg-[var(--caramel)] hover:bg-[var(--caramel)]/90'
-                          : 'bg-white/20 hover:bg-white/30'
-                      }`}
-                    >
-                      {plan.id === 'gratuit' ? 'Gratuit' : 'Choisir'}
-                    </button>
-                  )}
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
