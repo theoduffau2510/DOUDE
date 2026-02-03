@@ -36,7 +36,7 @@ export default function SignUp() {
         // Vérifier que le code existe dans la table students
        const { data: student, error: studentError } = await supabase
   .from('students')
-  .select('id, name, link_code, student_user_id, parent_email, user_id')
+  .select('*')
   .eq('link_code', formData.linkCode.toUpperCase())
   .maybeSingle()
 
