@@ -78,7 +78,7 @@ export default function SignIn() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, linkCode: e.target.value.trim().toUpperCase()})}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}                  
                   className="w-full py-3 pl-12 pr-4 border-2 border-[var(--sand)] rounded-xl focus:border-[var(--caramel)] focus:outline-none"
                   placeholder="votre@email.com"
                 />
