@@ -251,34 +251,6 @@ export default function EmploiVitrine() {
         </div>
       </section>
 
-      {/* STATISTIQUES */}
-      <section className="py-12 px-5 md:px-10 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-fraunces text-3xl text-[var(--espresso)] font-bold mb-8 text-center">
-            Votre semaine en chiffres
-          </h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-[var(--cream)] rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-[var(--caramel)] mb-2">12</div>
-              <div className="text-sm text-[var(--espresso-light)]">Cours cette semaine</div>
-            </div>
-            <div className="bg-[var(--cream)] rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-[var(--sage)] mb-2">18h</div>
-              <div className="text-sm text-[var(--espresso-light)]">Heures d'enseignement</div>
-            </div>
-            <div className="bg-[var(--cream)] rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-[var(--espresso)] mb-2">8</div>
-              <div className="text-sm text-[var(--espresso-light)]">Élèves différents</div>
-            </div>
-            <div className="bg-[var(--cream)] rounded-2xl p-5 text-center shadow-md hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-[var(--caramel)] mb-2">100%</div>
-              <div className="text-sm text-[var(--espresso-light)]">Taux de présence</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FONCTIONNALITÉS AVANCÉES (PRO & PREMIUM) */}
       <section className="py-20 px-5 md:px-10 bg-white">
         <div className="max-w-6xl mx-auto">
