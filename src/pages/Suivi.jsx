@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
-import { Target, BookOpen, TrendingUp, Award, Star, CheckCircle, Sparkles, ArrowRight, LineChart, Edit2, Trash2, Plus, X, Download, Copy, BarChart3, Upload, FileText, Loader2, MessageCircle, FileDown, Calendar } from 'lucide-react'
 import { useTier } from '../hooks/useTier.jsx'
+import { Target, BookOpen, TrendingUp, Award, Star, CheckCircle, Sparkles, ArrowRight, LineChart, Edit2, Trash2, Plus, X, Download, Copy, BarChart3, Upload, FileText, Loader2, MessageCircle, FileDown, Calendar, ChevronDown } from 'lucide-react'
 import MessagingModal from '../components/MessagingModal'
 import { jsPDF } from 'jspdf'
 
@@ -154,7 +154,13 @@ export default function Suivi() {
   const [showMessagingModal, setShowMessagingModal] = useState(false);
   const [showBilanModal, setShowBilanModal] = useState(false);
   const [bilanTrimestre, setBilanTrimestre] = useState(1);
-
+  const [showSeanceModal, setShowSeanceModal] = useState(false);
+  const [seanceFormData, setSeanceFormData] = useState({ 
+  date: new Date().toISOString().split('T')[0], 
+  sujet: '', 
+  appreciation: '' 
+});
+  const [activeTab, setActiveTab] = useState('overview'); // ← AJOUTE ÇA ICI
   const [formData, setFormData] = useState({ 
     name: '', niveau: '3ème', matiere: '', tel: '', objectif: 14, parent_email: '', appreciation: '', show_progress_chart: false 
   });
@@ -448,6 +454,60 @@ useEffect(() => {
     }
   }
 
+  const handleAddSeance = async (e) => {
+  e.preventDefault()
+  if (!supabase) return
+
+  const newSeance = {
+    id: Date.now(),
+    date: seanceFormData.date,
+    sujet: seanceFormData.sujet,
+    appreciation: seanceFormData.appreciation
+  }
+
+  const currentSeances = Array.isArray(selectedStudent.seances) ? selectedStudent.seances : []
+  const updatedSeances = [...currentSeances, newSeance]
+
+  const { error } = await supabase
+    .from('students')
+    .update({ seances: updatedSeances })
+    .eq('id', selectedStudent.id)
+
+  if (error) {
+    console.error('Erreur ajout séance:', error)
+    alert('Erreur lors de l\'ajout de la séance')
+    return
+  }
+
+  const updatedStudent = { ...selectedStudent, seances: updatedSeances }
+  setSelectedStudent(updatedStudent)
+  setStudents(students.map(s => s.id === selectedStudent.id ? updatedStudent : s))
+  setShowSeanceModal(false)
+  setSeanceFormData({ date: new Date().toISOString().split('T')[0], sujet: '', appreciation: '' })
+}
+
+const handleDeleteSeance = async (seanceToDelete) => {
+  if (!supabase) return
+  if (!confirm('Supprimer cette séance ?')) return
+
+  const currentSeances = Array.isArray(selectedStudent.seances) ? selectedStudent.seances : []
+  const updatedSeances = currentSeances.filter(s => s.id !== seanceToDelete.id)
+
+  const { error } = await supabase
+    .from('students')
+    .update({ seances: updatedSeances })
+    .eq('id', selectedStudent.id)
+
+  if (error) {
+    console.error('Erreur suppression séance:', error)
+    return
+  }
+
+  const updatedStudent = { ...selectedStudent, seances: updatedSeances }
+  setSelectedStudent(updatedStudent)
+  setStudents(students.map(s => s.id === selectedStudent.id ? updatedStudent : s))
+}
+
   const exportToPDF = (student) => {
     if (!hasFeature('pdfExport')) {
       alert('L\'export PDF est réservé aux utilisateurs Premium et Pro.')
@@ -494,394 +554,330 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
 
   // Générateur de bilan trimestriel PDF
   const generateBilanPDF = (student, trimestre) => {
-    if (!hasFeature('pdfExport')) {
-      alert('Le bilan trimestriel est réservé aux utilisateurs Pro et Premium.')
-      return
-    }
+  if (!hasFeature('pdfExport')) {
+    alert('Le bilan trimestriel est réservé aux utilisateurs Pro et Premium.')
+    return
+  }
 
-    if (!student) {
-      alert('Erreur: aucun élève sélectionné')
-      return
-    }
+  if (!student) {
+    alert('Erreur: aucun élève sélectionné')
+    return
+  }
 
-    const allNotes = student.notes || []
-    const year = new Date().getFullYear()
+  const allNotes = student.notes || []
+const year = new Date().getFullYear()
+const currentMonth = new Date().getMonth() // 0 = janvier, 8 = septembre
 
-    // Définir les dates du trimestre
-    const trimestreDates = {
-      1: { start: new Date(year, 8, 1), end: new Date(year, 11, 31), label: '1er Trimestre (Sept - Dec)' },
-      2: { start: new Date(year, 0, 1), end: new Date(year, 2, 31), label: '2eme Trimestre (Jan - Mars)' },
-      3: { start: new Date(year, 3, 1), end: new Date(year, 5, 30), label: '3eme Trimestre (Avril - Juin)' }
-    }
+// Déterminer l'année scolaire
+const anneeScolaire = currentMonth >= 8 
+  ? `${year}-${year + 1}`      // Si on est après septembre : 2026-2027
+  : `${year - 1}-${year}`      // Si on est avant septembre : 2025-2026
 
-    const { start, end, label } = trimestreDates[trimestre]
+// Année de début de l'année scolaire
+const anneeDebut = currentMonth >= 8 ? year : year - 1
 
-    // Filtrer les notes du trimestre
-    let notesTrimestre = allNotes.filter(n => {
-      const noteDate = new Date(n.date)
-      return noteDate >= start && noteDate <= end
-    }).sort((a, b) => new Date(a.date) - new Date(b.date))
+const trimestreDates = {
+  1: { start: new Date(anneeDebut, 8, 1), end: new Date(anneeDebut, 11, 31), label: '1er Trimestre' },    // Sept-Déc
+  2: { start: new Date(anneeDebut + 1, 0, 1), end: new Date(anneeDebut + 1, 2, 31), label: '2ème Trimestre' },  // Jan-Mars
+  3: { start: new Date(anneeDebut + 1, 3, 1), end: new Date(anneeDebut + 1, 5, 30), label: '3ème Trimestre' }   // Avril-Juin
+}
 
-    // Si aucune note dans le trimestre, utiliser toutes les notes
-    const useAllNotes = notesTrimestre.length === 0 && allNotes.length > 0
-    if (useAllNotes) {
-      notesTrimestre = [...allNotes].sort((a, b) => new Date(a.date) - new Date(b.date))
-    }
+  const { start, end, label } = trimestreDates[trimestre]
 
-    // Calculer les statistiques
-    const moyenne = notesTrimestre.length > 0
-      ? (notesTrimestre.reduce((acc, n) => acc + n.note, 0) / notesTrimestre.length).toFixed(2)
-      : null
+  let notesTrimestre = allNotes.filter(n => {
+    const noteDate = new Date(n.date)
+    return noteDate >= start && noteDate <= end
+  }).sort((a, b) => new Date(a.date) - new Date(b.date))
 
-    const noteMin = notesTrimestre.length > 0 ? Math.min(...notesTrimestre.map(n => n.note)) : null
-    const noteMax = notesTrimestre.length > 0 ? Math.max(...notesTrimestre.map(n => n.note)) : null
+  const useAllNotes = notesTrimestre.length === 0 && allNotes.length > 0
+  if (useAllNotes) {
+    notesTrimestre = [...allNotes].sort((a, b) => new Date(a.date) - new Date(b.date))
+  }
 
-    // Calculer la tendance
-    let tendance = 'Stable'
-    if (notesTrimestre.length >= 3) {
-      const firstHalf = notesTrimestre.slice(0, Math.floor(notesTrimestre.length / 2))
-      const secondHalf = notesTrimestre.slice(Math.floor(notesTrimestre.length / 2))
-      const avgFirst = firstHalf.reduce((a, n) => a + n.note, 0) / firstHalf.length
-      const avgSecond = secondHalf.reduce((a, n) => a + n.note, 0) / secondHalf.length
+  const moyenne = notesTrimestre.length > 0
+    ? (notesTrimestre.reduce((acc, n) => acc + n.note, 0) / notesTrimestre.length).toFixed(2)
+    : null
 
-      if (avgSecond - avgFirst > 0.5) tendance = 'En progression'
-      else if (avgFirst - avgSecond > 0.5) tendance = 'En regression'
-    }
+  const noteMin = notesTrimestre.length > 0 ? Math.min(...notesTrimestre.map(n => n.note)) : null
+  const noteMax = notesTrimestre.length > 0 ? Math.max(...notesTrimestre.map(n => n.note)) : null
 
-    const objectif = student.objectif || 14
-    const objectifAtteint = moyenne !== null && parseFloat(moyenne) >= objectif
+  let tendance = 'Stable'
+if (notesTrimestre.length >= 3) {
+  const firstHalf = notesTrimestre.slice(0, Math.floor(notesTrimestre.length / 2))
+  const secondHalf = notesTrimestre.slice(Math.floor(notesTrimestre.length / 2))
+  const avgFirst = firstHalf.reduce((a, n) => a + n.note, 0) / firstHalf.length
+  const avgSecond = secondHalf.reduce((a, n) => a + n.note, 0) / secondHalf.length
 
-    // Couleurs
-    const colors = {
-      sage: [139, 169, 131],      // Vert sage
-      caramel: [196, 154, 108],   // Caramel
-      espresso: [74, 60, 49],     // Marron foncé
-      cream: [250, 247, 242],     // Crème
-      coral: [229, 115, 115]      // Coral/Rouge
-    }
+  if (avgSecond - avgFirst > 0.5) tendance = 'Progression'  // ← Corrigé
+  else if (avgFirst - avgSecond > 0.5) tendance = 'En baisse'  // ← Corrigé
+}
 
-    // Créer le PDF
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.getWidth()
-    let y = 20
+  const objectif = student.objectif || 14
+  const objectifAtteint = moyenne !== null && parseFloat(moyenne) >= objectif
 
-    // En-tête avec bandeau coloré
-    doc.setFillColor(...colors.sage)
-    doc.rect(0, 0, pageWidth, 50, 'F')
+  const colors = {
+    sage: [139, 169, 131],
+    caramel: [196, 154, 108],
+    espresso: [74, 60, 49],
+    cream: [250, 247, 242],
+    coral: [229, 115, 115]
+  }
 
-    // Logo Doude en haut à gauche
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(22)
-    doc.setFont('helvetica', 'bold')
-    doc.text('doude', 15, 18)
-    doc.setFontSize(8)
+  const doc = new jsPDF()
+  const pageWidth = doc.internal.pageSize.getWidth()
+  let y = 20
+
+  // ===== EN-TÊTE MODERNE =====
+  doc.setFillColor(...colors.sage)
+  doc.rect(0, 0, pageWidth, 35, 'F')
+
+  // Logo + Titre sur la même ligne
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(18)
+  doc.setFont('helvetica', 'bold')
+  doc.text('doude', 15, 15)
+  
+  doc.setFontSize(16)
+  doc.text('BILAN TRIMESTRIEL', 15, 27)
+
+  // Info droite
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  doc.text(useAllNotes ? 'Toutes les notes' : label, pageWidth - 15, 15, { align: 'right' })
+  doc.text(anneeScolaire, pageWidth - 15, 23, { align: 'right' })
+
+  y = 45
+
+  // ===== CARTE ÉLÈVE =====
+  doc.setFillColor(255, 255, 255)
+  doc.roundedRect(15, y, pageWidth - 30, 28, 3, 3, 'F')
+  doc.setDrawColor(220, 220, 220)
+  doc.setLineWidth(0.5)
+  doc.roundedRect(15, y, pageWidth - 30, 28, 3, 3, 'S')
+
+  // Nom et infos
+  doc.setTextColor(...colors.espresso)
+  doc.setFontSize(16)
+  doc.setFont('helvetica', 'bold')
+  doc.text(student.name || 'Eleve', 20, y + 10)
+
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(100, 100, 100)
+  doc.text(`${student.niveau || 'N/A'} • ${student.matiere || 'N/A'}`, 20, y + 17)
+  doc.text(`Objectif: ${objectif}/20`, 20, y + 23)
+
+  y += 35
+
+  // ===== STATS EN LIGNE =====
+  const statWidth = (pageWidth - 40) / 4
+  const stats = [
+    { label: 'Notes', value: notesTrimestre.length.toString(), color: colors.sage },
+    { label: 'Moyenne', value: moyenne ? `${moyenne}/20` : 'N/A', color: objectifAtteint ? colors.sage : colors.caramel },
+    { label: 'Min - Max', value: noteMin !== null ? `${noteMin} - ${noteMax}` : 'N/A', color: colors.espresso },
+    { label: 'Tendance', value: tendance, color: colors.espresso }
+  ]
+
+  stats.forEach((stat, idx) => {
+    const x = 20 + idx * statWidth
+    
+    doc.setFillColor(250, 250, 250)
+    doc.roundedRect(x, y, statWidth - 3, 18, 2, 2, 'F')
+    
+    doc.setFontSize(7)
+    doc.setTextColor(120, 120, 120)
     doc.setFont('helvetica', 'normal')
-    doc.text('Suivi scolaire', 15, 24)
-
-    // Titre principal
-    doc.setFontSize(20)
-    doc.setFont('helvetica', 'bold')
-    doc.text('BILAN TRIMESTRIEL', pageWidth / 2 + 20, 18, { align: 'center' })
-
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'normal')
-    doc.text(useAllNotes ? 'Toutes les notes' : label, pageWidth / 2 + 20, 28, { align: 'center' })
-
-    doc.setFontSize(10)
-    doc.text(`Annee scolaire ${year}-${year + 1}`, pageWidth / 2 + 20, 38, { align: 'center' })
-
-    // Nom de l'élève bien visible
-    doc.setFillColor(...colors.caramel)
-    doc.roundedRect(pageWidth - 70, 8, 55, 14, 2, 2, 'F')
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'bold')
-    const displayName = (student.name || 'Eleve').length > 15
-      ? (student.name || 'Eleve').substring(0, 15) + '...'
-      : (student.name || 'Eleve')
-    doc.text(displayName, pageWidth - 42, 17, { align: 'center' })
-
-    y = 60
-
-    // Message si on utilise toutes les notes
-    if (useAllNotes) {
-      doc.setFillColor(255, 243, 205)
-      doc.roundedRect(15, y - 5, pageWidth - 30, 12, 2, 2, 'F')
-      doc.setTextColor(133, 100, 4)
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'italic')
-      doc.text('Aucune note pour ce trimestre - Affichage de toutes les notes disponibles', pageWidth / 2, y + 3, { align: 'center' })
-      y += 15
-    }
-
-    // Informations élève - Cadre
-    doc.setFillColor(...colors.cream)
-    doc.roundedRect(15, y - 5, pageWidth - 30, 38, 3, 3, 'F')
-
-    doc.setTextColor(...colors.espresso)
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
-    doc.text(student.name || 'Nom non defini', 25, y + 10)
-
+    doc.text(stat.label, x + (statWidth - 3) / 2, y + 6, { align: 'center' })
+    
     doc.setFontSize(11)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(100, 100, 100)
-    doc.text(`Niveau: ${student.niveau || 'Non defini'}`, 25, y + 20)
-    doc.text(`Matiere: ${student.matiere || 'Non specifiee'}`, 100, y + 20)
-    doc.text(`Objectif: ${objectif}/20`, 25, y + 29)
-    doc.text(`Total notes: ${allNotes.length}`, 100, y + 29)
-
-    y += 48
-
-    // Résultats du trimestre
-    doc.setFillColor(...colors.caramel)
-    doc.rect(15, y, pageWidth - 30, 8, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(12)
+    doc.setTextColor(...stat.color)
     doc.setFont('helvetica', 'bold')
-    doc.text('RESULTATS DU TRIMESTRE', 20, y + 6)
+    doc.text(stat.value, x + (statWidth - 3) / 2, y + 14, { align: 'center' })
+  })
 
-    y += 15
+  y += 25
 
-    // Stats en colonnes
-    const statsBoxWidth = (pageWidth - 40) / 4
-    const statsData = [
-      { label: 'Notes', value: notesTrimestre.length.toString() },
-      { label: 'Moyenne', value: moyenne ? `${moyenne}/20` : 'N/A' },
-      { label: 'Min / Max', value: noteMin !== null ? `${noteMin} / ${noteMax}` : 'N/A' },
-      { label: 'Tendance', value: tendance }
-    ]
+  // ===== GRAPHIQUE COMPACT =====
+  if (notesTrimestre.length > 0) {
+    doc.setFillColor(255, 255, 255)
+    doc.roundedRect(15, y, pageWidth - 30, 50, 3, 3, 'F')
+    doc.setDrawColor(220, 220, 220)
+    doc.setLineWidth(0.5)
+    doc.roundedRect(15, y, pageWidth - 30, 50, 3, 3, 'S')
 
-    statsData.forEach((stat, idx) => {
-      const x = 20 + idx * statsBoxWidth
-      doc.setFillColor(...colors.cream)
-      doc.roundedRect(x, y, statsBoxWidth - 5, 25, 2, 2, 'F')
+    doc.setFontSize(9)
+    doc.setTextColor(...colors.espresso)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Evolution des notes', 20, y + 7)
 
-      doc.setTextColor(...colors.espresso)
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      doc.text(stat.label, x + (statsBoxWidth - 5) / 2, y + 8, { align: 'center' })
+    const graphX = 25
+    const graphY = y + 12
+    const graphWidth = pageWidth - 50
+    const graphHeight = 32
+    const maxNote = 20
 
-      doc.setFontSize(14)
-      doc.setFont('helvetica', 'bold')
-      if (stat.label === 'Moyenne' && objectifAtteint) {
-        doc.setTextColor(...colors.sage)
+    // Lignes de référence
+    doc.setDrawColor(240, 240, 240)
+    doc.setLineWidth(0.3)
+    for (let i = 0; i <= 4; i++) {
+      const lineY = graphY + graphHeight - (i * graphHeight / 4)
+      doc.line(graphX, lineY, graphX + graphWidth, lineY)
+      
+      if (i > 0) {
+        doc.setFontSize(7)
+        doc.setTextColor(180, 180, 180)
+        doc.text((i * 5).toString(), graphX - 5, lineY + 2, { align: 'right' })
       }
-      doc.text(stat.value, x + (statsBoxWidth - 5) / 2, y + 19, { align: 'center' })
-      doc.setTextColor(...colors.espresso)
+    }
+
+    // Ligne objectif
+    const objectifY = graphY + graphHeight - (objectif / maxNote * graphHeight)
+    doc.setDrawColor(...colors.caramel)
+    doc.setLineWidth(0.4)
+    doc.setLineDashPattern([2, 2], 0)
+    doc.line(graphX, objectifY, graphX + graphWidth, objectifY)
+    doc.setLineDashPattern([], 0)
+
+    // Barres
+    const barWidth = Math.min(graphWidth / notesTrimestre.length, 30)
+    const spacing = graphWidth / notesTrimestre.length
+
+    notesTrimestre.forEach((note, idx) => {
+      const barX = graphX + idx * spacing + (spacing - barWidth) / 2
+      const barH = (note.note / maxNote) * graphHeight
+      const barY = graphY + graphHeight - barH
+
+      if (note.note >= objectif) {
+        doc.setFillColor(...colors.sage)
+      } else if (note.note >= 10) {
+        doc.setFillColor(...colors.caramel)
+      } else {
+        doc.setFillColor(...colors.coral)
+      }
+
+      doc.roundedRect(barX, barY, barWidth, barH, 1, 1, 'F')
+
+      // Valeur
     })
 
-    y += 35
+    y += 55
+  }
 
-    // Graphique de progression
-    if (notesTrimestre.length > 0) {
-      doc.setFillColor(...colors.sage)
-      doc.rect(15, y, pageWidth - 30, 8, 'F')
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'bold')
-      doc.text('GRAPHIQUE DE PROGRESSION', 20, y + 6)
+  // ===== LISTE DES NOTES =====
+  doc.setFillColor(255, 255, 255)
+  doc.roundedRect(15, y, pageWidth - 30, 10, 3, 3, 'FD')
+  
+  doc.setFontSize(9)
+  doc.setTextColor(...colors.espresso)
+  doc.setFont('helvetica', 'bold')
+  doc.text('Detail des notes', 20, y + 7)
 
-      y += 15
+  y += 12
 
-      // Dessiner le graphique
-      const graphX = 30
-      const graphY = y
-      const graphWidth = pageWidth - 60
-      const graphHeight = 40
-      const maxNote = 20
+  if (notesTrimestre.length > 0) {
+    notesTrimestre.slice(0, 8).forEach((note, idx) => {
+      if (y > 250) return
 
-      // Fond du graphique
-      doc.setFillColor(250, 250, 250)
-      doc.rect(graphX, graphY, graphWidth, graphHeight, 'F')
+      const bgColor = idx % 2 === 0 ? 255 : 250
+      doc.setFillColor(bgColor, bgColor, bgColor)
+      doc.rect(15, y, pageWidth - 30, 7, 'F')
 
-      // Lignes horizontales de référence
-      doc.setDrawColor(220, 220, 220)
-      doc.setLineWidth(0.3)
-      for (let i = 0; i <= 4; i++) {
-        const lineY = graphY + graphHeight - (i * graphHeight / 4)
-        doc.line(graphX, lineY, graphX + graphWidth, lineY)
-        doc.setFontSize(8)
-        doc.setTextColor(150, 150, 150)
-        doc.text((i * 5).toString(), graphX - 8, lineY + 2)
+      doc.setFontSize(8)
+      doc.setTextColor(100, 100, 100)
+      doc.setFont('helvetica', 'normal')
+      doc.text(new Date(note.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }), 20, y + 5)
+
+      if (note.note >= objectif) {
+        doc.setTextColor(...colors.sage)
+      } else if (note.note >= 10) {
+        doc.setTextColor(...colors.caramel)
+      } else {
+        doc.setTextColor(...colors.coral)
       }
+      doc.setFont('helvetica', 'bold')
+      doc.text(`${note.note}/20`, 50, y + 5)
 
-      // Ligne de l'objectif
-      const objectifY = graphY + graphHeight - (objectif / maxNote * graphHeight)
-      doc.setDrawColor(...colors.caramel)
-      doc.setLineWidth(0.5)
-      doc.setLineDashPattern([3, 2], 0)
-      doc.line(graphX, objectifY, graphX + graphWidth, objectifY)
-      doc.setLineDashPattern([], 0)
-
-      // Dessiner les barres (même avec 1 seule note)
-      const barWidth = graphWidth / Math.max(notesTrimestre.length, 1)
-
-      notesTrimestre.forEach((note, idx) => {
-        const barX = graphX + idx * barWidth + barWidth * 0.15
-        const barH = (note.note / maxNote) * graphHeight
-        const barY = graphY + graphHeight - barH
-
-        if (note.note >= objectif) {
-          doc.setFillColor(...colors.sage)
-        } else if (note.note >= 10) {
-          doc.setFillColor(...colors.caramel)
-        } else {
-          doc.setFillColor(...colors.coral)
-        }
-
-        const actualBarWidth = Math.min(barWidth * 0.7, 25)
-        doc.roundedRect(barX, barY, actualBarWidth, barH, 2, 2, 'F')
-
-        // Valeur de la note au-dessus de la barre
-        doc.setFontSize(9)
-        doc.setFont('helvetica', 'bold')
-        doc.setTextColor(...colors.espresso)
-        doc.text(`${note.note}`, barX + actualBarWidth / 2, barY - 3, { align: 'center' })
-
-        // Date en dessous
-        doc.setFontSize(6)
-        doc.setFont('helvetica', 'normal')
-        doc.setTextColor(120, 120, 120)
-        const dateStr = new Date(note.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
-        doc.text(dateStr, barX + actualBarWidth / 2, graphY + graphHeight + 6, { align: 'center' })
-      })
-
-      // Légende objectif
-      doc.setFontSize(7)
-      doc.setTextColor(...colors.caramel)
-      doc.text(`Objectif: ${objectif}/20`, graphX + graphWidth - 25, objectifY - 2)
-
-      y += graphHeight + 15
-    }
-
-    // Détail des notes
-    doc.setFillColor(...colors.sage)
-    doc.rect(15, y, pageWidth - 30, 8, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.text('DETAIL DES NOTES', 20, y + 6)
-
-    y += 15
-
-    if (notesTrimestre.length > 0) {
-      // En-tête du tableau
-      doc.setFillColor(240, 240, 240)
-      doc.rect(15, y, pageWidth - 30, 8, 'F')
       doc.setTextColor(...colors.espresso)
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'bold')
-      doc.text('Date', 25, y + 6)
-      doc.text('Note', 70, y + 6)
-      doc.text('Description', 100, y + 6)
+      doc.setFont('helvetica', 'normal')
+      const desc = note.description || 'Sans description'
+      doc.text(desc.length > 50 ? desc.substring(0, 50) + '...' : desc, 70, y + 5)
 
-      y += 10
+      y += 7
+    })
 
-      notesTrimestre.forEach((note, idx) => {
-        if (y > 270) {
-          doc.addPage()
-          y = 20
-        }
-
-        if (idx % 2 === 0) {
-          doc.setFillColor(250, 250, 250)
-          doc.rect(15, y - 3, pageWidth - 30, 8, 'F')
-        }
-
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(9)
-        doc.setTextColor(...colors.espresso)
-        doc.text(new Date(note.date).toLocaleDateString('fr-FR'), 25, y + 3)
-
-        // Couleur selon la note
-        if (note.note >= objectif) {
-          doc.setTextColor(...colors.sage)
-        } else if (note.note >= 10) {
-          doc.setTextColor(...colors.caramel)
-        } else {
-          doc.setTextColor(...colors.coral)
-        }
-        doc.setFont('helvetica', 'bold')
-        doc.text(`${note.note}/20`, 70, y + 3)
-
-        doc.setTextColor(...colors.espresso)
-        doc.setFont('helvetica', 'normal')
-        const desc = note.description || 'Sans description'
-        doc.text(desc.length > 40 ? desc.substring(0, 40) + '...' : desc, 100, y + 3)
-
-        y += 8
-      })
-    } else {
+    if (notesTrimestre.length > 8) {
+      doc.setFontSize(7)
       doc.setTextColor(150, 150, 150)
-      doc.setFontSize(10)
-      doc.text('Aucune note ce trimestre', pageWidth / 2, y + 5, { align: 'center' })
-      y += 15
+      doc.text(`+ ${notesTrimestre.length - 8} autres notes`, 20, y + 5)
+      y += 7
     }
-
-    y += 10
-
-    // Appréciation
-    if (y > 240) {
-      doc.addPage()
-      y = 20
-    }
-
-    doc.setFillColor(...colors.caramel)
-    doc.rect(15, y, pageWidth - 30, 8, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.text('APPRECIATION', 20, y + 6)
-
-    y += 15
-
-    doc.setFillColor(...colors.cream)
-    doc.roundedRect(15, y - 3, pageWidth - 30, 30, 3, 3, 'F')
-
-    doc.setTextColor(...colors.espresso)
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'italic')
-    const appreciation = student.appreciation || 'Aucune appreciation generale renseignee.'
-    const splitAppreciation = doc.splitTextToSize(appreciation, pageWidth - 40)
-    doc.text(splitAppreciation, 20, y + 5)
-
-    y += 35
-
-    // Félicitations si objectif atteint
-    if (objectifAtteint) {
-      doc.setFillColor(...colors.sage)
-      doc.roundedRect(15, y, pageWidth - 30, 20, 3, 3, 'F')
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(14)
-      doc.setFont('helvetica', 'bold')
-      doc.text('FELICITATIONS ! Objectif atteint !', pageWidth / 2, y + 13, { align: 'center' })
-      y += 25
-    }
-
-    // Pied de page
-    const footerY = doc.internal.pageSize.getHeight() - 12
-    doc.setDrawColor(...colors.sage)
-    doc.setLineWidth(0.5)
-    doc.line(15, footerY - 8, pageWidth - 15, footerY - 8)
-
-    // Logo doude dans le footer
-    doc.setTextColor(...colors.sage)
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.text('doude', 20, footerY)
-
+  } else {
+    doc.setFillColor(250, 250, 250)
+    doc.rect(15, y, pageWidth - 30, 10, 'F')
     doc.setTextColor(150, 150, 150)
     doc.setFontSize(8)
-    doc.setFont('helvetica', 'normal')
-    doc.text('- Suivi scolaire personnalise', 38, footerY)
-    doc.text(`Genere le ${new Date().toLocaleDateString('fr-FR')} a ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`, pageWidth - 20, footerY, { align: 'right' })
-
-    // Télécharger le PDF
-    const fileName = `bilan_T${trimestre}_${(student.name || 'eleve').replace(/\s+/g, '_')}_${year}.pdf`
-    doc.save(fileName)
-
-    setShowBilanModal(false)
+    doc.text('Aucune note ce trimestre', pageWidth / 2, y + 6, { align: 'center' })
+    y += 12
   }
+
+  // ===== APPRÉCIATION =====
+  if (student.appreciation) {
+    y += 3
+    doc.setFillColor(255, 255, 255)
+    doc.roundedRect(15, y, pageWidth - 30, 10, 3, 3, 'FD')
+    
+    doc.setFontSize(9)
+    doc.setTextColor(...colors.espresso)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Appreciation', 20, y + 7)
+
+    y += 12
+
+    doc.setFillColor(250, 247, 242)
+    doc.roundedRect(15, y, pageWidth - 30, 18, 2, 2, 'F')
+
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'italic')
+    doc.setTextColor(100, 100, 100)
+    const appreciation = student.appreciation
+    const splitAppreciation = doc.splitTextToSize(appreciation, pageWidth - 40)
+    doc.text(splitAppreciation.slice(0, 3), 20, y + 5)
+
+    y += 20
+  }
+
+  // ===== FÉLICITATIONS =====
+  if (objectifAtteint) {
+    y += 2
+    doc.setFillColor(...colors.sage)
+    doc.roundedRect(15, y, pageWidth - 30, 12, 2, 2, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('FELICITATIONS ! Objectif atteint !', pageWidth / 2, y + 8, { align: 'center' })
+  }
+
+  // ===== FOOTER =====
+  const footerY = doc.internal.pageSize.getHeight() - 10
+  doc.setDrawColor(220, 220, 220)
+  doc.setLineWidth(0.3)
+  doc.line(15, footerY - 5, pageWidth - 15, footerY - 5)
+
+  doc.setTextColor(...colors.sage)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  doc.text('doude', 20, footerY)
+
+  doc.setTextColor(150, 150, 150)
+  doc.setFontSize(7)
+  doc.setFont('helvetica', 'normal')
+  doc.text(`Genere le ${new Date().toLocaleDateString('fr-FR')}`, pageWidth - 20, footerY, { align: 'right' })
+
+  const fileName = `bilan_T${trimestre}_${(student.name || 'eleve').replace(/\s+/g, '_')}_${year}.pdf`
+  doc.save(fileName)
+
+  setShowBilanModal(false)
+}
 
   // Upload PDF pour l'élève
   const handlePdfUpload = async (e, studentId) => {
@@ -1464,10 +1460,6 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
         {/* Courbe de progression (affichée seulement si activée) */}
         {hasFeature('progressChart') && selectedStudent.show_progress_chart && (
           <div className="mb-8">
-            <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold mb-4 flex items-center gap-2">
-              <LineChart className="text-[var(--sage)]" size={24} />
-              Graphique détaillé
-            </h3>
             <ProgressChart
               notes={selectedStudent.notes}
               objectif={selectedStudent.objectif || 14}
@@ -1476,223 +1468,325 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
           </div>
         )}
 
-              <div className="p-8">
-                {/* Stats en grille */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Award className="text-[var(--sage)]" size={20} />
-                    </div>
-                    <div className="text-2xl font-fraunces font-bold text-[var(--espresso)]">
-                      {calculateAverage(selectedStudent.notes) || '-'}
-                    </div>
-                    <div className="text-xs text-[var(--espresso-light)]">Moyenne /20</div>
-                  </div>
+             <div className="p-8">
+  {/* Stats en grille */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <Award className="text-[var(--sage)]" size={20} />
+      </div>
+      <div className="text-2xl font-fraunces font-bold text-[var(--espresso)]">
+        {calculateAverage(selectedStudent.notes) || '-'}
+      </div>
+      <div className="text-xs text-[var(--espresso-light)]">Moyenne /20</div>
+    </div>
 
-                  <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Target className="text-[var(--caramel)]" size={20} />
-                    </div>
-                    <div className="text-2xl font-fraunces font-bold text-[var(--caramel)]">
-                      {selectedStudent.objectif || 14}
-                    </div>
-                    <div className="text-xs text-[var(--espresso-light)]">Objectif /20</div>
-                  </div>
+    <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <Target className="text-[var(--caramel)]" size={20} />
+      </div>
+      <div className="text-2xl font-fraunces font-bold text-[var(--caramel)]">
+        {selectedStudent.objectif || 14}
+      </div>
+      <div className="text-xs text-[var(--espresso-light)]">Objectif /20</div>
+    </div>
 
-                  <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <BookOpen className="text-[var(--sage)]" size={20} />
-                    </div>
-                    <div className="text-2xl font-fraunces font-bold text-[var(--espresso)]">
-                      {selectedStudent.notes?.length || 0}
-                    </div>
-                    <div className="text-xs text-[var(--espresso-light)]">Notes</div>
-                  </div>
+    <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <BookOpen className="text-[var(--sage)]" size={20} />
+      </div>
+      <div className="text-2xl font-fraunces font-bold text-[var(--espresso)]">
+        {selectedStudent.notes?.length || 0}
+      </div>
+      <div className="text-xs text-[var(--espresso-light)]">Notes</div>
+    </div>
 
-                  <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <TrendingUp className="text-[var(--sage)]" size={20} />
-                    </div>
-                    <div className={`text-2xl font-fraunces font-bold ${(selectedStudent.progression || 0) >= 100 ? 'text-[var(--sage)]' : 'text-[var(--caramel)]'}`}>
-                      {selectedStudent.progression || 0}%
-                    </div>
-                    <div className="text-xs text-[var(--espresso-light)]">Progression</div>
+    <div className="bg-[var(--cream)] rounded-2xl p-5 text-center">
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <TrendingUp className="text-[var(--sage)]" size={20} />
+      </div>
+      <div className={`text-2xl font-fraunces font-bold ${(selectedStudent.progression || 0) >= 100 ? 'text-[var(--sage)]' : 'text-[var(--caramel)]'}`}>
+        {selectedStudent.progression || 0}%
+      </div>
+      <div className="text-xs text-[var(--espresso-light)]">Progression</div>
+    </div>
+  </div>
+
+  {/* ONGLETS */}
+  <div className="flex gap-2 mb-6 border-b-2 border-[var(--cream)] overflow-x-auto">
+    <button
+      onClick={() => setActiveTab('overview')}
+      className={`py-3 px-6 font-semibold text-sm transition-all whitespace-nowrap ${
+        activeTab === 'overview'
+          ? 'text-[var(--sage)] border-b-2 border-[var(--sage)] -mb-0.5'
+          : 'text-[var(--espresso-light)] hover:text-[var(--espresso)]'
+      }`}
+    >
+      Vue d'ensemble
+    </button>
+    <button
+      onClick={() => setActiveTab('seances')}
+      className={`py-3 px-6 font-semibold text-sm transition-all whitespace-nowrap ${
+        activeTab === 'seances'
+          ? 'text-[var(--sage)] border-b-2 border-[var(--sage)] -mb-0.5'
+          : 'text-[var(--espresso-light)] hover:text-[var(--espresso)]'
+      }`}
+    >
+      Séances ({selectedStudent.seances?.length || 0})
+    </button>
+    <button
+      onClick={() => setActiveTab('notes')}
+      className={`py-3 px-6 font-semibold text-sm transition-all whitespace-nowrap ${
+        activeTab === 'notes'
+          ? 'text-[var(--sage)] border-b-2 border-[var(--sage)] -mb-0.5'
+          : 'text-[var(--espresso-light)] hover:text-[var(--espresso)]'
+      }`}
+    >
+      Notes scolaires ({selectedStudent.notes?.length || 0})
+    </button>
+    <button
+      onClick={() => setActiveTab('documents')}
+      className={`py-3 px-6 font-semibold text-sm transition-all whitespace-nowrap ${
+        activeTab === 'documents'
+          ? 'text-[var(--sage)] border-b-2 border-[var(--sage)] -mb-0.5'
+          : 'text-[var(--espresso-light)] hover:text-[var(--espresso)]'
+      }`}
+    >
+      Documents
+    </button>
+  </div>
+
+  {/* CONTENU SELON L'ONGLET */}
+  
+  {/* Onglet Vue d'ensemble */}
+  {activeTab === 'overview' && (
+    <>
+      {/* Objectif */}
+      <div className="bg-[var(--cream)] rounded-2xl p-6 mb-8">
+        <div className="flex items-start gap-3 mb-4">
+          <Target className="text-[var(--caramel)] mt-1" size={24} />
+          <div className="flex-1">
+            <h3 className="font-semibold text-[var(--espresso)] mb-1">Objectif de note</h3>
+            <p className="text-sm text-[var(--espresso-light)]">
+              {(selectedStudent.progression || 0) >= 100
+                ? 'Objectif atteint ! 🎉'
+                : `Encore ${((selectedStudent.objectif || 14) - parseFloat(calculateAverage(selectedStudent.notes) || 0)).toFixed(1)} points`
+              }
+            </p>
+          </div>
+          <select
+            value={selectedStudent.objectif || 14}
+            onChange={(e) => handleUpdateObjectif(e.target.value)}
+            className="py-2 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--sage)] focus:outline-none bg-white font-semibold"
+          >
+            {[...Array(20)].map((_, i) => (
+              <option key={i + 1} value={i + 1}>{i + 1}/20</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Courbe de progression */}
+      {hasFeature('progressChart') && selectedStudent.show_progress_chart && (
+        <div className="mb-8">
+          <ProgressChart
+            notes={selectedStudent.notes}
+            objectif={selectedStudent.objectif || 14}
+            hasAccess={true}
+          />
+        </div>
+      )}
+
+      {/* Appréciation générale */}
+      <div className="mb-8">
+        <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold mb-4">Appréciation générale</h3>
+        <textarea
+          value={selectedStudent.appreciation || ''}
+          onChange={(e) => handleUpdateAppreciation(e.target.value)}
+          className="w-full py-4 px-5 border-2 border-[var(--sand)] rounded-2xl text-sm focus:border-[var(--sage)] focus:outline-none resize-none bg-[var(--cream)]"
+          rows={4}
+          placeholder="Écrivez votre appréciation sur l'élève..."
+        />
+      </div>
+    </>
+  )}
+
+  {/* Onglet Séances */}
+  {activeTab === 'seances' && (
+    <div className="mb-8">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold">Séances de cours</h3>
+        <button
+          onClick={() => setShowSeanceModal(true)}
+          className="py-2 px-5 bg-[var(--caramel)] text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all cursor-pointer border-none inline-flex items-center gap-2"
+        >
+          <Plus size={16} />
+          Ajouter
+        </button>
+      </div>
+
+      {(!Array.isArray(selectedStudent.seances) || selectedStudent.seances.length === 0) ? (
+        <div className="bg-[var(--cream)] rounded-2xl p-8 text-center">
+          <BookOpen className="mx-auto text-[var(--espresso-light)] mb-3" size={40} />
+          <p className="text-[var(--espresso-light)]">Aucune séance enregistrée</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {[...selectedStudent.seances].sort((a, b) => new Date(b.date) - new Date(a.date)).map((seance, index) => (
+            <div key={seance.id || index} className="bg-[var(--cream)] rounded-2xl p-5 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="text-sm font-semibold text-[var(--espresso)] mb-1">{seance.sujet || 'Sans sujet'}</div>
+                  <div className="text-xs text-[var(--espresso-light)]">
+                    {new Date(seance.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
                 </div>
+                <button
+                  onClick={() => handleDeleteSeance(seance)}
+                  className="text-[var(--coral)] hover:text-red-600 cursor-pointer bg-transparent border-none p-2"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+              
+              {seance.appreciation && (
+                <div className="bg-white rounded-lg p-3 text-sm text-[var(--espresso)] border-l-4 border-[var(--caramel)]">
+                  💭 {seance.appreciation}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
 
-                {/* Objectif */}
-                <div className="bg-[var(--cream)] rounded-2xl p-6 mb-8">
-                  <div className="flex items-start gap-3 mb-4">
-                    <Target className="text-[var(--caramel)] mt-1" size={24} />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-[var(--espresso)] mb-1">Objectif de note</h3>
-                      <p className="text-sm text-[var(--espresso-light)]">
-                        {(selectedStudent.progression || 0) >= 100
-                          ? 'Objectif atteint ! 🎉'
-                          : `Encore ${((selectedStudent.objectif || 14) - parseFloat(calculateAverage(selectedStudent.notes) || 0)).toFixed(1)} points`
-                        }
-                      </p>
-                    </div>
-                    <select
-                      value={selectedStudent.objectif || 14}
-                      onChange={(e) => handleUpdateObjectif(e.target.value)}
-                      className="py-2 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--sage)] focus:outline-none bg-white font-semibold"
-                    >
-                      {[...Array(20)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>{i + 1}/20</option>
-                      ))}
-                    </select>
+  {/* Onglet Notes */}
+  {activeTab === 'notes' && (
+    <div className="mb-8">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold">Notes scolaires</h3>
+        <button
+          onClick={openNoteModal}
+          className="py-2 px-5 bg-[var(--sage)] text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all cursor-pointer border-none inline-flex items-center gap-2"
+        >
+          <Plus size={16} />
+          Ajouter
+        </button>
+      </div>
+
+      {(!Array.isArray(selectedStudent.notes) || selectedStudent.notes.length === 0) ? (
+        <div className="bg-[var(--cream)] rounded-2xl p-8 text-center">
+          <BookOpen className="mx-auto text-[var(--espresso-light)] mb-3" size={40} />
+          <p className="text-[var(--espresso-light)]">Aucune note enregistrée</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {[...selectedStudent.notes].sort((a, b) => new Date(b.date) - new Date(a.date)).map((note, index) => (
+            <div key={note.id || `${note.date}-${note.note}-${index}`} className="bg-[var(--cream)] rounded-2xl p-5 flex justify-between items-center hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-4">
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
+                  note.note >= (selectedStudent.objectif || 14) ? 'bg-[var(--sage)]/20 text-[var(--sage)]' :
+                  note.note >= 10 ? 'bg-[var(--caramel)]/20 text-[var(--caramel)]' : 'bg-[var(--coral)]/20 text-[var(--coral)]'
+                }`}>
+                  {note.note}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-[var(--espresso)]">{note.description || 'Sans description'}</div>
+                  <div className="text-xs text-[var(--espresso-light)]">
+                    {new Date(note.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
                 </div>
+              </div>
+              <button
+                onClick={() => handleDeleteNote(note)}
+                className="text-[var(--coral)] hover:text-red-600 cursor-pointer bg-transparent border-none p-2"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
 
-                {/* Courbe de progression */}
-                <div className="mb-8">
-                  <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold mb-4 flex items-center gap-2">
-                    <LineChart className="text-[var(--sage)]" size={24} />
-                    Courbe de progression
-                  </h3>
-                  <ProgressChart
-                    notes={selectedStudent.notes}
-                    objectif={selectedStudent.objectif || 14}
-                    hasAccess={hasFeature('progressChart') && selectedStudent.show_progress_chart}
-                  />
+  {/* Onglet Documents */}
+  {activeTab === 'documents' && (
+    <div className="mb-8">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold flex items-center gap-2">
+          <FileText className="text-[var(--caramel)]" size={24} />
+          Documents PDF
+          <span className="text-xs font-normal text-[var(--espresso-light)]">(max {getMaxPdfSizeLabel()})</span>
+        </h3>
+        <label className="py-2 px-5 bg-[var(--caramel)] text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all cursor-pointer inline-flex items-center gap-2">
+          {uploadingPdf ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              Upload...
+            </>
+          ) : (
+            <>
+              <Upload size={16} />
+              Ajouter PDF
+            </>
+          )}
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={(e) => handlePdfUpload(e, selectedStudent.id)}
+            className="hidden"
+            disabled={uploadingPdf}
+          />
+        </label>
+      </div>
+
+      {(!selectedStudent.pdfs || selectedStudent.pdfs.length === 0) ? (
+        <div className="bg-[var(--cream)] rounded-2xl p-8 text-center">
+          <FileText className="mx-auto text-[var(--espresso-light)] mb-3" size={40} />
+          <p className="text-[var(--espresso-light)]">Aucun document PDF</p>
+          <p className="text-xs text-[var(--espresso-light)] mt-2">
+            Ajoutez des fiches, exercices ou cours pour votre élève
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {selectedStudent.pdfs.map((pdf) => (
+            <div key={pdf.id} className="bg-[var(--cream)] rounded-2xl p-4 flex justify-between items-center hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[var(--caramel)]/20 flex items-center justify-center">
+                  <FileText className="text-[var(--caramel)]" size={24} />
                 </div>
-
-                {/* Section Notes */}
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold">Notes</h3>
-                    <button
-                      onClick={openNoteModal}
-                      className="py-2 px-5 bg-[var(--sage)] text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all cursor-pointer border-none inline-flex items-center gap-2"
-                    >
-                      <Plus size={16} />
-                      Ajouter
-                    </button>
+                <div>
+                  <div className="text-sm font-semibold text-[var(--espresso)]">{pdf.name}</div>
+                  <div className="text-xs text-[var(--espresso-light)]">
+                    Ajouté le {new Date(pdf.uploadedAt).toLocaleDateString('fr-FR')}
                   </div>
-
-                  {(!Array.isArray(selectedStudent.notes) || selectedStudent.notes.length === 0) ? (
-                    <div className="bg-[var(--cream)] rounded-2xl p-8 text-center">
-                      <BookOpen className="mx-auto text-[var(--espresso-light)] mb-3" size={40} />
-                      <p className="text-[var(--espresso-light)]">Aucune note enregistrée</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {[...selectedStudent.notes].sort((a, b) => new Date(b.date) - new Date(a.date)).map((note, index) => (
-                        <div key={note.id || `${note.date}-${note.note}-${index}`} className="bg-[var(--cream)] rounded-2xl p-5 flex justify-between items-center hover:shadow-md transition-shadow">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
-                              note.note >= (selectedStudent.objectif || 14) ? 'bg-[var(--sage)]/20 text-[var(--sage)]' :
-                              note.note >= 10 ? 'bg-[var(--caramel)]/20 text-[var(--caramel)]' : 'bg-[var(--coral)]/20 text-[var(--coral)]'
-                            }`}>
-                              {note.note}
-                            </div>
-                            <div>
-                              <div className="text-sm font-semibold text-[var(--espresso)]">{note.description || 'Sans description'}</div>
-                              <div className="text-xs text-[var(--espresso-light)]">
-                                {new Date(note.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteNote(note)}
-                            className="text-[var(--coral)] hover:text-red-600 cursor-pointer bg-transparent border-none p-2"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-
-                {/* Appréciation */}
-                <div className="mb-8">
-                  <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold mb-4">Appréciation générale</h3>
-                  <textarea
-                    value={selectedStudent.appreciation || ''}
-                    onChange={(e) => handleUpdateAppreciation(e.target.value)}
-                    className="w-full py-4 px-5 border-2 border-[var(--sand)] rounded-2xl text-sm focus:border-[var(--sage)] focus:outline-none resize-none bg-[var(--cream)]"
-                    rows={4}
-                    placeholder="Écrivez votre appréciation sur l'élève..."
-                  />
-                </div>
-
-                {/* Documents PDF (Pro only) */}
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold flex items-center gap-2">
-                      <FileText className="text-[var(--caramel)]" size={24} />
-                      Documents PDF
-                      <span className="text-xs font-normal text-[var(--espresso-light)]">(max {getMaxPdfSizeLabel()})</span>
-                    </h3>
-                    <label className="py-2 px-5 bg-[var(--caramel)] text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all cursor-pointer inline-flex items-center gap-2">
-                      {uploadingPdf ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" />
-                          Upload...
-                        </>
-                      ) : (
-                        <>
-                          <Upload size={16} />
-                          Ajouter PDF
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={(e) => handlePdfUpload(e, selectedStudent.id)}
-                        className="hidden"
-                        disabled={uploadingPdf}
-                      />
-                    </label>
-                  </div>
-
-                  {(!selectedStudent.pdfs || selectedStudent.pdfs.length === 0) ? (
-                    <div className="bg-[var(--cream)] rounded-2xl p-8 text-center">
-                      <FileText className="mx-auto text-[var(--espresso-light)] mb-3" size={40} />
-                      <p className="text-[var(--espresso-light)]">Aucun document PDF</p>
-                      <p className="text-xs text-[var(--espresso-light)] mt-2">
-                        Ajoutez des fiches, exercices ou cours pour votre élève
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {selectedStudent.pdfs.map((pdf) => (
-                        <div key={pdf.id} className="bg-[var(--cream)] rounded-2xl p-4 flex justify-between items-center hover:shadow-md transition-shadow">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-[var(--caramel)]/20 flex items-center justify-center">
-                              <FileText className="text-[var(--caramel)]" size={24} />
-                            </div>
-                            <div>
-                              <div className="text-sm font-semibold text-[var(--espresso)]">{pdf.name}</div>
-                              <div className="text-xs text-[var(--espresso-light)]">
-                                Ajouté le {new Date(pdf.uploadedAt).toLocaleDateString('fr-FR')}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={pdf.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2 text-[var(--sage)] hover:bg-[var(--sage)]/10 rounded-lg transition-colors"
-                            >
-                              <Download size={18} />
-                            </a>
-                            <button
-                              onClick={() => handleDeletePdf(pdf)}
-                              className="p-2 text-[var(--coral)] hover:bg-[var(--coral)]/10 rounded-lg transition-colors bg-transparent border-none cursor-pointer"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={pdf.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 text-[var(--sage)] hover:bg-[var(--sage)]/10 rounded-lg transition-colors"
+                >
+                  <Download size={18} />
+                </a>
+                <button
+                  onClick={() => handleDeletePdf(pdf)}
+                  className="p-2 text-[var(--coral)] hover:bg-[var(--coral)]/10 rounded-lg transition-colors bg-transparent border-none cursor-pointer"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
                 {/* Actions */}
                 <div className="flex flex-col gap-3 pt-6 border-t border-[var(--cream)]">
                   <div className="flex gap-3">
@@ -1807,6 +1901,66 @@ Généré par Doude le ${new Date().toLocaleDateString('fr-FR')}
             </div>
           </div>
         )}
+
+{/* Modal Ajouter une séance */}
+{showSeanceModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-5">
+    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="font-fraunces text-2xl text-[var(--espresso)] font-bold">Ajouter une séance</h2>
+        <button onClick={() => setShowSeanceModal(false)} className="text-[var(--espresso-light)] hover:text-[var(--espresso)] cursor-pointer bg-transparent border-none">
+          <X size={24} />
+        </button>
+      </div>
+      <form onSubmit={handleAddSeance}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-[var(--espresso)] mb-2">Date *</label>
+            <input
+              type="date"
+              required
+              value={seanceFormData.date}
+              onChange={(e) => setSeanceFormData({...seanceFormData, date: e.target.value})}
+              className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--sage)] focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[var(--espresso)] mb-2">Sujet du cours *</label>
+            <input
+              type="text"
+              required
+              value={seanceFormData.sujet}
+              onChange={(e) => setSeanceFormData({...seanceFormData, sujet: e.target.value})}
+              className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--sage)] focus:outline-none"
+              placeholder="Ex: Equations du second degré"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[var(--espresso)] mb-2">Appréciation</label>
+            <textarea
+              value={seanceFormData.appreciation}
+              onChange={(e) => setSeanceFormData({...seanceFormData, appreciation: e.target.value})}
+              className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--sage)] focus:outline-none resize-none"
+              rows={4}
+              placeholder="Comportement, difficultés rencontrées..."
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button type="submit" className="flex-1 py-3 bg-[var(--caramel)] text-white rounded-full font-semibold hover:shadow-xl transition-all cursor-pointer border-none">
+            Ajouter
+          </button>
+          <button type="button" onClick={() => setShowSeanceModal(false)} className="flex-1 py-3 bg-[var(--cream)] text-[var(--espresso)] rounded-full font-semibold hover:bg-[var(--sand)] transition-colors cursor-pointer border-none">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
         {/* Modal Code de liaison */}
         {linkCodeModal && (
