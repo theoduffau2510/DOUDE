@@ -33,6 +33,9 @@ export default function SignUp() {
           return
         }
 
+        console.log('Recherche avec:', formData.linkCode.toUpperCase())
+console.log('Valeur brute:', JSON.stringify(formData.linkCode))
+
         // Vérifier que le code existe dans la table students
        const { data: student, error: studentError } = await supabase
   .from('students')
@@ -40,9 +43,8 @@ export default function SignUp() {
   .eq('link_code', formData.linkCode.toUpperCase())
   .single()
 
-        console.log('Recherche link_code:', formData.linkCode.toUpperCase())
-        console.log('Student trouvé:', student)
-        console.log('Erreur Supabase:', studentError)
+       console.log('Résultat:', student)
+console.log('Erreur:', studentError)
 
         if (studentError || !student) {
           setError(`Code de liaison invalide. ${studentError?.message || 'Code non trouvé'}`)

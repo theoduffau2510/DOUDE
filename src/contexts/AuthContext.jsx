@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     password,
     options: {
       data: metadata,
-      emailRedirectTo: `${window.location.origin}/sign-in` // ← AJOUTEZ CETTE LIGNE
+      emailRedirectTo: `${window.location.origin}/sign-in` 
     }
   })
   return { data, error }
