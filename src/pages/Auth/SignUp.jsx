@@ -38,7 +38,7 @@ export default function SignUp() {
   .from('students')
   .select('*')
   .eq('link_code', formData.linkCode.toUpperCase())
-  .maybeSingle()
+  .single()
 
         console.log('Recherche link_code:', formData.linkCode.toUpperCase())
         console.log('Student trouvé:', student)

@@ -36,15 +36,16 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const signUp = async (email, password, metadata = {}) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: metadata
-      }
-    })
-    return { data, error }
-  }
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: metadata,
+      emailRedirectTo: `${window.location.origin}/sign-in` // ← AJOUTEZ CETTE LIGNE
+    }
+  })
+  return { data, error }
+}
 
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({
