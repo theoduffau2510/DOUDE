@@ -3,9 +3,34 @@ import { supabase } from '../lib/supabase';
 
 export function useStudentAuth() {
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null); // ← AJOUTÉ
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // ← NOUVELLE fonction pour récupérer le rôle
+  const fetchUserRole = async (userId) => {
+    if (!userId) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('users_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Erreur récupération rôle:', error);
+        return null;
+      }
+      
+      console.log('🎭 Rôle récupéré:', data?.role);
+      return data?.role;
+    } catch (err) {
+      console.error('Erreur fetchUserRole:', err);
+      return null;
+    }
+  };
 
   // Fonction pour récupérer les données élève
   const fetchStudentData = async (userId) => {
@@ -32,7 +57,7 @@ export function useStudentAuth() {
   };
 
   useEffect(() => {
-    let isMounted = true; // Pour éviter les updates après unmount
+    let isMounted = true;
 
     const initAuth = async () => {
       try {
@@ -46,14 +71,21 @@ export function useStudentAuth() {
         if (!isMounted) return;
         setUser(currentUser);
 
-        // ✅ IMPORTANT : Récupérer les données SEULEMENT si c'est un élève
-        if (currentUser?.user_metadata?.role === 'eleve') {
-          console.log('🔍 Recherche des données élève pour:', currentUser.id);
-          const student = await fetchStudentData(currentUser.id);
+        // ✅ Récupérer le rôle depuis users_roles
+        if (currentUser) {
+          const role = await fetchUserRole(currentUser.id);
           if (!isMounted) return;
-          setStudentData(student);
-        } else {
-          setStudentData(null);
+          setUserRole(role);
+
+          // Si c'est un élève, récupérer ses données
+          if (role === 'eleve') {
+            console.log('🔍 Recherche des données élève pour:', currentUser.id);
+            const student = await fetchStudentData(currentUser.id);
+            if (!isMounted) return;
+            setStudentData(student);
+          } else {
+            setStudentData(null);
+          }
         }
       } catch (err) {
         console.error('Erreur initialisation Auth:', err);
@@ -74,11 +106,20 @@ export function useStudentAuth() {
       if (!isMounted) return;
       setUser(currentUser);
 
-      if (currentUser?.user_metadata?.role === 'eleve') {
-        const student = await fetchStudentData(currentUser.id);
+      if (currentUser) {
+        const role = await fetchUserRole(currentUser.id);
         if (!isMounted) return;
-        setStudentData(student);
+        setUserRole(role);
+
+        if (role === 'eleve') {
+          const student = await fetchStudentData(currentUser.id);
+          if (!isMounted) return;
+          setStudentData(student);
+        } else {
+          setStudentData(null);
+        }
       } else {
+        setUserRole(null);
         setStudentData(null);
       }
       
@@ -93,7 +134,7 @@ export function useStudentAuth() {
 
   // Fonction refetch pour recharger les données
   const refetch = async () => {
-    if (user?.user_metadata?.role === 'eleve') {
+    if (user && userRole === 'eleve') {
       const student = await fetchStudentData(user.id);
       setStudentData(student);
     }
@@ -111,15 +152,15 @@ export function useStudentAuth() {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [user]);
+  }, [user, userRole]);
   
-  // ✅ RETOUR AMÉLIORÉ
   return {
     user,
+    userRole, // ← AJOUTÉ
     loading,
     error,
     isAuthenticated: !!user,
-    isStudent: user?.user_metadata?.role === 'eleve', // ← Basé sur le rôle, pas studentData
+    isStudent: userRole === 'eleve', // ← Basé sur userRole depuis users_roles
     studentData,
     supabaseClient: supabase
   };

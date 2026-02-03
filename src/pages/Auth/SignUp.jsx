@@ -33,8 +33,14 @@ export default function SignUp() {
           return
         }
 
-        console.log('Recherche avec:', formData.linkCode.toUpperCase())
-console.log('Valeur brute:', JSON.stringify(formData.linkCode))
+console.log('=== DÉBOGAGE LINK CODE ===')
+console.log('Valeur brute:', `"${formData.linkCode}"`)
+console.log('Longueur:', formData.linkCode.length)
+console.log('Après trim:', `"${formData.linkCode.trim()}"`)
+console.log('Après trim + upper:', `"${formData.linkCode.trim().toUpperCase()}"`)
+console.log('Longueur finale:', formData.linkCode.trim().toUpperCase().length)
+
+const cleanCode = formData.linkCode.trim().toUpperCase()
 
         // Vérifier que le code existe dans la table students
        const { data: student, error: studentError } = await supabase
@@ -43,7 +49,8 @@ console.log('Valeur brute:', JSON.stringify(formData.linkCode))
   .eq('link_code', formData.linkCode.toUpperCase())
   .single()
 
-       console.log('Résultat:', student)
+console.log('Code recherché:', cleanCode)
+console.log('Résultat:', student)
 console.log('Erreur:', studentError)
 
         if (studentError || !student) {

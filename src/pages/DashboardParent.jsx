@@ -42,15 +42,6 @@ export default function DashboardParent() {
     }
   }, [student]);
 
-  useEffect(() => {
-    if (!authLoading && user && !student) {
-      const timer = setTimeout(() => {
-        navigate('/link-account');
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [authLoading, user, student, navigate]);
-
   const fetchSchedule = async () => {
     setLoading(true);
     try {

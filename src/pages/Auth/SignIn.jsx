@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../../lib/supabase'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { ArrowLeft, Mail, Lock, Sparkles } from 'lucide-react'
@@ -15,25 +16,43 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+  e.preventDefault()
+  setError('')
+  setLoading(true)
 
-    const { data, error } = await signIn(formData.email, formData.password)
+  const { data, error } = await signIn(formData.email, formData.password)
 
+  if (error) {
     setLoading(false)
+    setError('Email ou mot de passe incorrect')
+    return
+  }
 
-    if (error) {
-      setError('Email ou mot de passe incorrect')
-    } else {
-      // Redirection selon le rôle
-      const role = data.user.user_metadata?.role
-      if (role === 'eleve') {
-        navigate('/parent')
-      } else {
-        navigate('/')
-      }
-    }
+  // ✅ Récupérer le rôle depuis users_roles
+  const { data: userRole, error: roleError } = await supabase
+    .from('users_roles')
+    .select('role')
+    .eq('user_id', data.user.id)
+    .single()
+
+  setLoading(false)
+
+  if (roleError || !userRole) {
+    setError('Erreur lors de la récupération du rôle')
+    console.error('Role error:', roleError)
+    return
+  }
+
+  console.log('🎭 Rôle récupéré:', userRole.role)
+
+  // Redirection selon le rôle
+  if (userRole.role === 'eleve') {
+    navigate('/parent')
+  } else if (userRole.role === 'prof') {
+    navigate('/')
+  } else {
+    navigate('/')
+  }
   }
 
   return (
