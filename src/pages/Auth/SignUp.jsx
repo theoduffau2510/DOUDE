@@ -20,134 +20,140 @@ export default function SignUp() {
   const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+  e.preventDefault()
+  setError('')
+  setLoading(true)
 
-    try {
-      // Si c'est un élève, vérifier le code de liaison
-      if (formData.role === 'eleve') {
-        if (!formData.linkCode) {
-          setError('Le code de liaison est requis pour les élèves')
-          setLoading(false)
-          return
-        }
+  let studentData = null;
 
-console.log('=== DÉBOGAGE LINK CODE ===')
-console.log('Valeur brute:', `"${formData.linkCode}"`)
-console.log('Longueur:', formData.linkCode.length)
-console.log('Après trim:', `"${formData.linkCode.trim()}"`)
-console.log('Après trim + upper:', `"${formData.linkCode.trim().toUpperCase()}"`)
-console.log('Longueur finale:', formData.linkCode.trim().toUpperCase().length)
-
-const cleanCode = formData.linkCode.trim().toUpperCase()
-
-        // Vérifier que le code existe dans la table students
-       const { data: student, error: studentError } = await supabase
-  .from('students')
-  .select('*')
-  .eq('link_code', formData.linkCode.toUpperCase())
-  .single()
-
-console.log('Code recherché:', cleanCode)
-console.log('Résultat:', student)
-console.log('Erreur:', studentError)
-
-        if (studentError || !student) {
-          setError(`Code de liaison invalide. ${studentError?.message || 'Code non trouvé'}`)
-          setLoading(false)
-          return
-        }
-
-        // Vérifier que l'email correspond (si renseigné par le prof)
-        if (student.parent_email && student.parent_email !== formData.email) {
-          setError(`Ce code est réservé à l'email : ${student.parent_email}`)
-          setLoading(false)
-          return
-        }
-
-        // Vérifier que le compte n'est pas déjà lié
-        if (student.student_user_id) {
-          setError('Ce code a déjà été utilisé')
-          setLoading(false)
-          return
-        }
-      }
-
-      // Créer le compte Supabase Auth
-      const { data, error } = await signUp(
-        formData.email,
-        formData.password,
-        {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          role: formData.role
-        }
-      )
-
-      console.log('🔍 Résultat signUp:', { data, error })
-
-      if (error) {
-        setError(error.message)
+  try {
+    // Si c'est un élève, vérifier le code de liaison
+    if (formData.role === 'eleve') {
+      if (!formData.linkCode) {
+        setError('Le code de liaison est requis pour les élèves')
         setLoading(false)
         return
       }
 
-      // ✅ NOUVEAU : Créer/mettre à jour la ligne dans users_roles avec le bon rôle
-      if (data.user) {
-        console.log('👤 User créé avec ID:', data.user.id)
-        console.log('📋 Role:', formData.role)
-        
-        const { error: userRoleError } = await supabase
-          .from('users_roles')
-          .insert({
-            user_id: data.user.id,
-            email: formData.email,
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            role: formData.role,  // ← Le bon rôle (prof ou eleve)
-            is_admin: false,
-            created_at: new Date().toISOString()
-          })
+      console.log('=== DÉBOGAGE LINK CODE ===')
+      console.log('Valeur brute:', `"${formData.linkCode}"`)
+      console.log('Longueur:', formData.linkCode.length)
+      console.log('Après trim:', `"${formData.linkCode.trim()}"`)
+      console.log('Après trim + upper:', `"${formData.linkCode.trim().toUpperCase()}"`)
+      console.log('Longueur finale:', formData.linkCode.trim().toUpperCase().length)
 
-        console.log('📝 Résultat insert users_roles:', userRoleError)
+      const cleanCode = formData.linkCode.trim().toUpperCase()
 
-        if (userRoleError) {
-          console.error('Erreur création users_roles:', userRoleError)
-          // On continue quand même, c'est pas bloquant
-        } else {
-          console.log('✅ User créé dans users_roles avec succès !')
-        }
-      } else {
-        console.log('❌ Pas de data.user ! Data complète:', data)
+      // Vérifier que le code existe via la fonction sécurisée
+      const { data: student, error: studentError } = await supabase
+        .rpc('verify_link_code', { code: cleanCode })
+        .single()
+
+      studentData = student;
+
+      console.log('Code recherché:', cleanCode)
+      console.log('Résultat:', student)
+      console.log('Erreur:', studentError)
+
+      if (studentError || !student) {
+        setError(`Code de liaison invalide. ${studentError?.message || 'Code non trouvé'}`)
+        setLoading(false)
+        return
       }
 
-      // Si c'est un élève, mettre à jour la table students avec le student_user_id
-      if (formData.role === 'eleve' && data.user) {
-        const { error: updateError } = await supabase
-          .from('students')
-          .update({
-            student_user_id: data.user.id,
-            parent_email: formData.email // Mettre à jour l'email si pas déjà renseigné
-          })
-          .eq('link_code', formData.linkCode.toUpperCase())
-
-        if (updateError) {
-          console.error('Erreur mise à jour student:', updateError)
-        }
+      // Vérifier que l'email correspond (si renseigné par le prof)
+      if (student.parent_email && student.parent_email !== formData.email) {
+        setError(`Ce code est réservé à l'email : ${student.parent_email}`)
+        setLoading(false)
+        return
       }
 
-      // Afficher le message de confirmation email
-      setShowEmailConfirmation(true)
-      setLoading(false)
-
-    } catch (err) {
-      setError('Une erreur est survenue. Réessayez.')
-      console.error(err)
-      setLoading(false)
+      // Vérifier que le compte n'est pas déjà lié
+      if (!student.is_available) {
+        setError('Ce code a déjà été utilisé')
+        setLoading(false)
+        return
+      }
     }
-  }
 
+    // Créer le compte Supabase Auth
+    const { data, error } = await signUp(
+      formData.email,
+      formData.password,
+      {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        role: formData.role
+      }
+    )
+
+    console.log('🔍 Résultat signUp:', { data, error })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
+    }
+
+    // Créer la ligne dans users_roles avec le bon rôle
+    if (data.user) {
+      console.log('👤 User créé avec ID:', data.user.id)
+      console.log('📋 Role:', formData.role)
+      
+      const { error: userRoleError } = await supabase
+        .from('users_roles')
+        .insert({
+          user_id: data.user.id,
+          email: formData.email,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          role: formData.role,
+          is_admin: false,
+          created_at: new Date().toISOString()
+        })
+
+      console.log('📝 Résultat insert users_roles:', userRoleError)
+
+      if (userRoleError) {
+        console.error('Erreur création users_roles:', userRoleError)
+      } else {
+        console.log('✅ User créé dans users_roles avec succès !')
+      }
+    } else {
+      console.log('❌ Pas de data.user ! Data complète:', data)
+    }
+
+    // Si c'est un élève, mettre à jour la table students avec le student_user_id
+    if (formData.role === 'eleve' && data.user && studentData) {
+  console.log('🔄 Liaison via fonction RPC...')
+  
+  const { data: linkResult, error: linkError } = await supabase
+    .rpc('link_student_account', {
+      p_student_id: studentData.student_id,
+      p_user_id: data.user.id,
+      p_parent_email: formData.email
+    })
+
+  console.log('📊 Résultat liaison:', linkResult)
+  console.log('❌ Erreur liaison:', linkError)
+
+  if (linkError || !linkResult?.success) {
+    console.error('Erreur liaison student:', linkError || linkResult?.error)
+  } else {
+    console.log('✅ Student lié avec succès via RPC !')
+  }
+}
+
+    // Afficher le message de confirmation email
+    setShowEmailConfirmation(true)
+    setLoading(false)
+
+  } catch (err) {
+    setError('Une erreur est survenue. Réessayez.')
+    console.error(err)
+    setLoading(false)
+  }
+}
   // Écran de confirmation email
   if (showEmailConfirmation) {
     return (
