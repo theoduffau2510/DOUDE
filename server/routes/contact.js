@@ -1,20 +1,9 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const router = express.Router();
 
-// Configuration du transporteur SMTP (Zimbra)
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'ssl0.ovh.net',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true', // true pour 465, false pour 587
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 router.post('/send', async (req, res) => {
   try {
@@ -42,10 +31,9 @@ router.post('/send', async (req, res) => {
     };
     const subjectLabel = subjectMap[subject] || subject;
 
-    // Vérifier si SMTP est configuré
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error('❌ SMTP_USER ou SMTP_PASS non configuré');
-      // En mode dév sans config, on simule l'envoi
+    // Vérifier si l'API key est configurée
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY non configurée');
       if (process.env.NODE_ENV !== 'production') {
         console.log('📧 [DEV] Email simulé:');
         console.log(`   De: ${firstName} ${lastName} <${email}>`);
@@ -56,12 +44,10 @@ router.post('/send', async (req, res) => {
       return res.status(500).json({ error: 'Service email non configuré' });
     }
 
-    const transporter = createTransporter();
-
-    // Envoyer l'email
-    const mailOptions = {
-      from: `"Doude Contact" <${process.env.SMTP_USER}>`,
-      to: 'contact@doude.app',
+    // Envoyer l'email avec Resend
+    const { data, error } = await resend.emails.send({
+      from: 'Doude Contact <contact@doude.app>',
+      to: ['contact@doude.app'],
       replyTo: email,
       subject: `[Doude] ${subjectLabel} - ${firstName} ${lastName}`,
       html: `
@@ -85,11 +71,14 @@ router.post('/send', async (req, res) => {
           </p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Email envoyé avec succès à contact@doude.app');
+    if (error) {
+      console.error('❌ Erreur Resend:', error);
+      return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email' });
+    }
 
+    console.log('✅ Email envoyé avec succès:', data.id);
     res.json({ success: true, message: 'Message envoyé avec succès' });
 
   } catch (error) {
