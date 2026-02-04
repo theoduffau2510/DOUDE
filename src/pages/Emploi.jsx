@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
 import { usePageVisibility } from '../hooks/usePageVisibility'
 import { Calendar, Clock, Sparkles, CheckCircle, XCircle, MousePointer2, Repeat, X, Link, Unlink, RefreshCw, ExternalLink, Loader2 } from 'lucide-react'
 import { useTier } from '../hooks/useTier.jsx'
@@ -13,13 +13,6 @@ export default function Emploi() {
   // Google Calendar Modal
   const [showGoogleModal, setShowGoogleModal] = useState(false)
   const [syncResult, setSyncResult] = useState(null)
-
-  const supabase = useMemo(() => {
-  return createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-  )
-}, [])
 
   const [currentWeekStart, setCurrentWeekStart] = useState(getMonday(new Date()))
   const [slots, setSlots] = useState({})
@@ -43,7 +36,7 @@ export default function Emploi() {
       fetchSlots()
     }
   })
-  
+
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
   const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
