@@ -92,8 +92,8 @@ export default function Contact() {
             <h3 className="font-fraunces text-lg text-[var(--espresso)] mb-2">Adresse</h3>
             <p className="text-[var(--espresso-light)] text-sm">
               Doude SAS<br />
-              123 Avenue des Professeurs<br />
-              75011 Paris, France
+              323 Avenue Paul Emile Victor<br />
+              77000 Melun, France
             </p>
           </div>
 
