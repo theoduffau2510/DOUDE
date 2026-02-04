@@ -1,13 +1,47 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+
 export default function Contact() {
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: '',
+    message: ''
+  })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setFormSubmitted(true)
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch(`${API_URL}/api/contact/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'envoi')
+      }
+
+      setFormSubmitted(true)
+    } catch (err) {
+      setError(err.message || 'Une erreur est survenue. Réessayez plus tard.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleNewsletter = (e) => {
@@ -47,8 +81,8 @@ export default function Contact() {
             <div className="text-3xl mb-3">💬</div>
             <h3 className="font-fraunces text-lg text-[var(--espresso)] mb-2">Support technique</h3>
             <p className="text-[var(--espresso-light)] text-sm mb-3">Un problème avec votre compte ? Notre équipe technique vous aide.</p>
-            <a href="mailto:support@doude.fr" className="text-[var(--caramel)] font-semibold text-sm hover:text-[var(--caramel-dark)] transition-colors">
-              support@doude.fr
+            <a href="mailto:contact@doude.app" className="text-[var(--caramel)] font-semibold text-sm hover:text-[var(--caramel-dark)] transition-colors">
+              contact@doude.app
             </a>
           </div>
 
@@ -88,6 +122,12 @@ export default function Contact() {
               <h2 className="font-fraunces text-2xl text-[var(--espresso)] mb-2">Envoyez-nous un message</h2>
               <p className="text-[var(--espresso-light)] text-sm mb-6">Remplissez le formulaire ci-dessous et nous vous répondrons rapidement.</p>
 
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                  {error}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-xs font-semibold text-[var(--espresso-light)] uppercase tracking-wide mb-2">
@@ -97,6 +137,8 @@ export default function Contact() {
                     type="text"
                     placeholder="Votre prénom"
                     required
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                     className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--caramel)] focus:outline-none transition-colors"
                   />
                 </div>
@@ -108,6 +150,8 @@ export default function Contact() {
                     type="text"
                     placeholder="Votre nom"
                     required
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                     className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--caramel)] focus:outline-none transition-colors"
                   />
                 </div>
@@ -121,6 +165,8 @@ export default function Contact() {
                   type="email"
                   placeholder="votre@email.com"
                   required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--caramel)] focus:outline-none transition-colors"
                 />
               </div>
@@ -131,7 +177,8 @@ export default function Contact() {
                 </label>
                 <select
                   required
-                  defaultValue=""
+                  value={formData.subject}
+                  onChange={(e) => setFormData({...formData, subject: e.target.value})}
                   className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--caramel)] focus:outline-none transition-colors bg-white"
                 >
                   <option value="" disabled>Choisissez un sujet</option>
@@ -152,6 +199,8 @@ export default function Contact() {
                   placeholder="Décrivez votre demande en détail..."
                   required
                   rows={5}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
                   className="w-full py-3 px-4 border-2 border-[var(--sand)] rounded-xl text-sm focus:border-[var(--caramel)] focus:outline-none transition-colors resize-none"
                 />
               </div>
@@ -167,13 +216,23 @@ export default function Contact() {
 
               <button
                 type="submit"
-                className="w-full py-4 px-6 bg-[var(--espresso)] text-[var(--cream)] rounded-full font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-[var(--caramel-dark)] transition-colors cursor-pointer border-none"
+                disabled={isLoading}
+                className="w-full py-4 px-6 bg-[var(--espresso)] text-[var(--cream)] rounded-full font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-[var(--caramel-dark)] transition-colors cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Envoyer le message
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    Envoyer le message
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  </>
+                )}
               </button>
             </form>
           ) : (

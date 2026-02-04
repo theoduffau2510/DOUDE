@@ -417,21 +417,31 @@ export default function SuiviParent() {
               ) : (
                 <div className="space-y-3">
                   {[...student.notes].sort((a, b) => new Date(b.date) - new Date(a.date)).map((note, index) => (
-                    <div key={note.id || `${note.date}-${note.note}-${index}`} className="bg-[var(--cream)] rounded-2xl p-5 flex justify-between items-center hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
-                          note.note >= (student.objectif || 14) ? 'bg-[var(--sage)]/20 text-[var(--sage)]' :
-                          note.note >= 10 ? 'bg-[var(--caramel)]/20 text-[var(--caramel)]' : 'bg-[var(--coral)]/20 text-[var(--coral)]'
-                        }`}>
-                          {note.note}
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[var(--espresso)]">{note.description || 'Sans description'}</div>
-                          <div className="text-xs text-[var(--espresso-light)]">
-                            {new Date(note.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    <div key={note.id || `${note.date}-${note.note}-${index}`} className="bg-[var(--cream)] rounded-2xl p-5 hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold ${
+                            note.note >= (student.objectif || 14) ? 'bg-[var(--sage)]/20 text-[var(--sage)]' :
+                            note.note >= 10 ? 'bg-[var(--caramel)]/20 text-[var(--caramel)]' : 'bg-[var(--coral)]/20 text-[var(--coral)]'
+                          }`}>
+                            {note.note}
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-[var(--espresso)]">{note.description || 'Sans description'}</div>
+                            <div className="text-xs text-[var(--espresso-light)]">
+                              {new Date(note.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </div>
                           </div>
                         </div>
                       </div>
+                      {note.appreciation && (
+                        <div className="mt-3 pt-3 border-t border-[var(--sand)]">
+                          <p className="text-sm text-[var(--espresso-light)] italic flex items-start gap-2">
+                            <MessageCircle size={16} className="text-[var(--caramel)] mt-0.5 flex-shrink-0" />
+                            <span>"{note.appreciation}"</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

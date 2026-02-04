@@ -13,6 +13,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import stripeRoutes from './routes/stripe.js';
 import stripeWebhook from './webhooks/stripe.js';
+import contactRoutes from './routes/contact.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -118,6 +119,7 @@ app.get('/health', (req, res) => {
 // ROUTES API
 // ============================================
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/contact', contactRoutes);
 
 // ============================================
 // GESTION DES ERREURS

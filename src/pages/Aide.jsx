@@ -221,8 +221,8 @@ export default function Aide() {
         <div className="mt-8 grid md:grid-cols-2 gap-4">
           <div className="bg-[var(--sand)] rounded-2xl p-6">
             <h4 className="font-semibold text-[var(--espresso)] mb-2">📧 Par email</h4>
-            <a href="mailto:contactdoude@gmail.com" className="text-[var(--caramel)] hover:underline">
-              contactdoude@gmail.com
+            <a href="mailto:contact@doude.app" className="text-[var(--caramel)] hover:underline">
+              contact@doude.app
             </a>
           </div>
           <div className="bg-[var(--sand)] rounded-2xl p-6">

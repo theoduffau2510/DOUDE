@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
+import { Analytics } from '@vercel/analytics/react';
 
 import Navbar from '../components/Navbar'
 import NavbarParent from '../components/NavbarParent'
@@ -37,9 +38,6 @@ import ComptaVitrine from './ComptaVitrine.jsx'
 
 import ProtectedAdminRoute from "../components/ProtectedAdminRoute";
 import AdminDashboard from "../Admin/AdminDashboard.jsx";
-
-import { Analytics } from '@vercel/analytics/react';
-
 
 // Composant pour rediriger les élèves automatiquement
 function StudentRedirect({ children }) {
@@ -177,13 +175,12 @@ function AppLayout() {
 }
 
 function App() {
-  // Le refresh de session est géré par AuthContext
-  // Le refresh des données est géré par usePageVisibility dans chaque page
   return (
     <AuthProvider>
       <BrowserRouter>
         <AppLayout />
       </BrowserRouter>
+       <Analytics />
     </AuthProvider>
   )
 }

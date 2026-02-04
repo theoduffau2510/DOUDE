@@ -22,7 +22,7 @@ export default function Confidentialite() {
             <div className="bg-white rounded-2xl p-6 shadow-sm space-y-2">
               <p><strong>Responsable :</strong> DUFFAU</p>
               <p><strong>Adresse :</strong> 323 avenue Paul Emile Victor, 77000 Melun, France</p>
-              <p><strong>Email :</strong> contactdoude@gmail.com</p>
+              <p><strong>Email :</strong> contact@doude.app</p>
               <p><strong>SIRET :</strong> 99221410600013</p>
             </div>
           </section>
@@ -197,8 +197,8 @@ export default function Confidentialite() {
               </ul>
               <p className="text-[var(--espresso-light)] mt-4">
                 Pour exercer ces droits, contactez-nous à :{' '}
-                <a href="mailto:contactdoude@gmail.com" className="text-[var(--caramel)] hover:underline">
-                  contactdoude@gmail.com
+                <a href="mailto:contact@doude.app" className="text-[var(--caramel)] hover:underline">
+                  contact@doude.app
                 </a>
               </p>
             </div>
