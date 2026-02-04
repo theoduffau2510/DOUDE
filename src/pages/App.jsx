@@ -1,7 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '../contexts/AuthContext'
-import { useEffect } from 'react'
-import { supabase } from '../lib/supabase'
 
 import Navbar from '../components/Navbar'
 import NavbarParent from '../components/NavbarParent'
@@ -176,50 +174,8 @@ function AppLayout() {
 }
 
 function App() {
-  // ✅ PREMIER useEffect
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible') {
-        console.log('🔄 Page visible - refresh session Supabase')
-        await supabase.auth.getSession()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
-
-  // ✅ DEUXIÈME useEffect
-  useEffect(() => {
-    let inactivityTimer
-
-    const resetTimer = () => {
-      clearTimeout(inactivityTimer)
-      inactivityTimer = setTimeout(() => {
-        console.log('🔄 Inactivité détectée - refresh session')
-        supabase.auth.getSession()
-      }, 30000) // 30 secondes
-    }
-
-    // Reset timer sur chaque interaction
-    window.addEventListener('click', resetTimer)
-    window.addEventListener('keypress', resetTimer)
-    window.addEventListener('scroll', resetTimer)
-    
-    resetTimer() // Init
-
-    return () => {
-      clearTimeout(inactivityTimer)
-      window.removeEventListener('click', resetTimer)
-      window.removeEventListener('keypress', resetTimer)
-      window.removeEventListener('scroll', resetTimer)
-    }
-  }, [])
-
-  // ✅ RETURN (UNE SEULE FOIS)
+  // Le refresh de session est géré par AuthContext
+  // Le refresh des données est géré par usePageVisibility dans chaque page
   return (
     <AuthProvider>
       <BrowserRouter>
