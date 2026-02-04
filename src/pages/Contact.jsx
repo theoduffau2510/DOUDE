@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
 
 export default function Contact() {
   const [formSubmitted, setFormSubmitted] = useState(false)
