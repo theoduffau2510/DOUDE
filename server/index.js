@@ -23,10 +23,10 @@ const PORT = process.env.PORT || 3001;
 // ============================================
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
-      process.env.FRONTEND_URL, // URL de production
-      'https://votre-domaine.com', // Remplacer par votre domaine
-      'https://www.votre-domaine.com' // Avec www si nécessaire
-    ].filter(Boolean) // Filtrer les valeurs undefined
+      process.env.FRONTEND_URL,
+      'https://doude.app',
+      'https://www.doude.app'
+    ].filter(Boolean)
   : [
       'http://localhost:5173',
       'http://localhost:5174', // Au cas où le port change
