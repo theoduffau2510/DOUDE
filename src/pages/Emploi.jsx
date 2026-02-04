@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import { Calendar, Clock, Sparkles, CheckCircle, XCircle, MousePointer2, Repeat, X, Link, Unlink, RefreshCw, ExternalLink, Loader2 } from 'lucide-react'
 import { useTier } from '../hooks/useTier.jsx'
 import { useGoogleCalendar } from '../hooks/useGoogleCalendar.jsx'
@@ -37,6 +38,12 @@ export default function Emploi() {
   const [showMultiRecurrenceModal, setShowMultiRecurrenceModal] = useState(false)
   const [multiRecurrenceEndDate, setMultiRecurrenceEndDate] = useState('')
 
+  usePageVisibility(() => {
+    if (user) {
+      fetchSlots()
+    }
+  })
+  
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
   const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 

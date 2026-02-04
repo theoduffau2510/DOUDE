@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useTier } from '../hooks/useTier.jsx'
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import {
   LineChart,
   Calendar,
@@ -34,6 +35,13 @@ export default function DashboardProf() {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [statsPeriod, setStatsPeriod] = useState('month') // 'month' | 'year'
 
+  usePageVisibility(() => {
+    if (user) {
+      fetchStats()
+      fetchStudents()
+    }
+  })
+  
   useEffect(() => {
     if (user) {
       fetchStats()

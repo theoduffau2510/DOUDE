@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { useTier } from '../hooks/useTier.jsx'
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import { Target, BookOpen, TrendingUp, Award, Star, CheckCircle, Sparkles, ArrowRight, LineChart, Edit2, Trash2, Plus, X, Download, Copy, BarChart3, Upload, FileText, Loader2, MessageCircle, FileDown, Calendar, ChevronDown } from 'lucide-react'
 import MessagingModal from '../components/MessagingModal'
 import { jsPDF } from 'jspdf'
@@ -140,7 +141,6 @@ function ProgressChart({ notes, objectif, hasAccess }) {
 export default function Suivi() {
   const [user, setUser] = useState(null);
   const { tier, isPro, isPremium, canAddStudent, hasFeature, limits, canUploadPdf, getMaxPdfSizeLabel } = useTier()
-
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -168,6 +168,12 @@ export default function Suivi() {
  const [noteFormData, setNoteFormData] = useState({ 
     note: '', date: new Date().toISOString().split('T')[0], description: '' 
   });
+
+  usePageVisibility(() => {
+  if (user) {
+    fetchStudents()
+  }
+})
 
 useEffect(() => {
   // Récupère l'utilisateur actuel

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import {
   Calendar,
   LineChart,
@@ -25,6 +26,13 @@ export default function DashboardParent() {
   const [showMessagingModal, setShowMessagingModal] = useState(false); // ← AJOUTÉ
   const [unreadCount, setUnreadCount] = useState(0); // ← AJOUTÉ
 
+   usePageVisibility(() => {
+    if (student) {
+      fetchSchedule()
+      fetchUnreadCount()
+    }
+  })
+  
   useEffect(() => {
     if (student) {
       fetchSchedule();

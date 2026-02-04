@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { useTier, TIER_LIMITS, TIER_LABELS, TIER_COLORS } from '../hooks/useTier.jsx'
 import { stripeAPI } from '../lib/api';
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import {
   Crown,
   CheckCircle,
@@ -32,6 +33,12 @@ export default function MonAbonnement() {
   const [studentCount, setStudentCount] = useState(0)
   const [error, setError] = useState(null)
 
+   usePageVisibility(() => {
+    if (user) {
+      fetchData()
+    }
+  })
+  
   useEffect(() => {
     if (user) {
       fetchData()

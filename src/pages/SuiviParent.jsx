@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import { Target, BookOpen, TrendingUp, Award, Star, Sparkles, LineChart, BarChart3, FileText, Download, MessageCircle, Loader2, Lock } from 'lucide-react'
 
 // Composant pour télécharger un PDF avec régénération d'URL si nécessaire
@@ -220,6 +221,11 @@ export default function SuiviParent() {
   const [loading, setLoading] = useState(true)
   const [showMessagingModal, setShowMessagingModal] = useState(false)
 
+    usePageVisibility(() => {
+    if (user) {
+      fetchStudentData()
+    }
+  })
   // Récupérer l'utilisateur connecté
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {

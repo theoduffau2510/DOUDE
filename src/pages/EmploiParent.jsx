@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { usePageVisibility } from '../hooks/usePageVisibility'
 import { Calendar, Clock, Sparkles, CheckCircle, XCircle, AlertCircle, Repeat, X } from 'lucide-react'
 
 export default function EmploiParent() {
@@ -17,6 +18,12 @@ export default function EmploiParent() {
   const [showRecurrenceModal, setShowRecurrenceModal] = useState(false)
   const [recurrenceEndDate, setRecurrenceEndDate] = useState('')
 
+  usePageVisibility(() => {
+    if (student) {
+      fetchSlots()
+    }
+  })
+  
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
   const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
