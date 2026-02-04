@@ -38,6 +38,9 @@ import ComptaVitrine from './ComptaVitrine.jsx'
 import ProtectedAdminRoute from "../components/ProtectedAdminRoute";
 import AdminDashboard from "../Admin/AdminDashboard.jsx";
 
+import { Analytics } from '@vercel/analytics/react';
+
+
 // Composant pour rediriger les élèves automatiquement
 function StudentRedirect({ children }) {
   const { user } = useAuth()
