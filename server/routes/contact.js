@@ -6,7 +6,7 @@ const router = express.Router();
 // Configuration du transporteur SMTP (Zimbra)
 const createTransporter = () => {
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'mail.doude.app',
+    host: process.env.SMTP_HOST || 'ssl0.ovh.net',
     port: parseInt(process.env.SMTP_PORT) || 587,
     secure: process.env.SMTP_SECURE === 'true', // true pour 465, false pour 587
     auth: {
