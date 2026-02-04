@@ -27,7 +27,21 @@ export const AuthProvider = ({ children }) => {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    // Rafraîchir la session quand l'utilisateur revient sur la page
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          setUser(session?.user ?? null)
+        })
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const signUp = async (email, password, metadata = {}) => {
