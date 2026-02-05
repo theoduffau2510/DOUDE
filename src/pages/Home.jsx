@@ -529,7 +529,7 @@ export default function Home() {
                 tagline: "Pour tester",
                 price: "0",
                 annual: null,
-                features: ["10 élèves max", "Planning basique", "Suivi progression", "Upload PDF"],
+                features: ["5 élèves max", "Planning basique", "Suivi progression", "Upload PDF"],
                 cta: "Gratuit",
                 featured: false,
                 description: "Gratuit à vie"
@@ -539,7 +539,7 @@ export default function Home() {
                 tagline: "Populaire",
                 price: "5,99",
                 annual: "60€/an (2 mois off.)",
-                features: ["30 élèves max", "Planning avancé", "Stats détaillées", "PDF illimité", "Support 48h"],
+                features: ["10 élèves max", "Planning avancé", "Stats détaillées", "PDF illimité", "Support 48h"],
                 cta: "Essai 30j",
                 featured: true,
                 description: "Pour la majorité"
