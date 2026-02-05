@@ -120,11 +120,7 @@ export default function Home() {
                 <div className="mt-4 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3 sm:gap-6 text-xs md:text-sm" style={{color: 'var(--sand)'}}>
                   <span className="flex items-center gap-2">
                     <Check size={14} style={{color: 'var(--sage)'}} />
-                    30 jours gratuits
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Check size={14} style={{color: 'var(--sage)'}} />
-                    Sans CB
+                    14 jours gratuits
                   </span>
                   <span className="flex items-center gap-2">
                     <Check size={14} style={{color: 'var(--sage)'}} />
