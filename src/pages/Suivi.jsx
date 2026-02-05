@@ -1592,17 +1592,6 @@ if (notesTrimestre.length >= 3) {
         </div>
       </div>
 
-      {/* Courbe de progression */}
-      {hasFeature('progressChart') && selectedStudent.show_progress_chart && (
-        <div className="mb-8">
-          <ProgressChart
-            notes={selectedStudent.notes}
-            objectif={selectedStudent.objectif || 14}
-            hasAccess={true}
-          />
-        </div>
-      )}
-
       {/* Appréciation générale */}
       <div className="mb-8">
         <h3 className="font-fraunces text-xl text-[var(--espresso)] font-bold mb-4">Appréciation générale</h3>
