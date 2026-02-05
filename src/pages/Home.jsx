@@ -542,7 +542,6 @@ export default function Home() {
                 features: ["10 élèves max", "Planning avancé", "Stats détaillées", "PDF illimité", "Support 48h"],
                 cta: "Essai 30j",
                 featured: true,
-                description: "Pour la majorité"
               },
               {
                 name: "Premium",
@@ -552,7 +551,6 @@ export default function Home() {
                 features: ["Illimité", "Stats avancées", "Export données", "Intégrations", "Support <24h"],
                 cta: "Essai 30j",
                 featured: false,
-                description: "Professionnels"
               }
             ].map((plan, idx) => (
               <div 
